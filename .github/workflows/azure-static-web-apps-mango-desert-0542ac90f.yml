@@ -15,43 +15,53 @@ jobs:
     runs-on: ubuntu-latest
     name: Build and Deploy Job
     permissions:
-       id-token: write
-       contents: read
+      contents: read
     steps:
       - uses: actions/checkout@v3
         with:
           submodules: true
           lfs: false
-      - name: Install OIDC Client from Core Package
-        run: npm install @actions/core@1.6.0 @actions/http-client
-      - name: Get Id Token
-        uses: actions/github-script@v6
-        id: idtoken
+      - uses: actions/setup-node@v4
         with:
-           script: |
-               const coredemo = require('@actions/core')
-               return await coredemo.getIDToken()
-           result-encoding: string
-      - name: Build And Deploy
+          node-version: '22'
+      - name: Build and record deployment contents
+        env:
+          DEPLOYMENT_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+        run: |
+          npm install
+          npm test
+          npm run build
+          cp staticwebapp.config.json dist/staticwebapp.config.json
+          node scripts/verify-deployment.mjs create dist
+      - name: Deploy
         id: builddeploy
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_MANGO_DESERT_0542AC90F }}
           action: "upload"
-          ###### Repository/Build Configurations ######
-          app_location: "/" # SPA root (src/ is compiled by Vite)
-          api_location: "" # No API
-          output_location: "dist" # Vite build output
-          github_id_token: ${{ steps.idtoken.outputs.result }}
-          ###### End of Repository/Build Configurations ######
+          app_location: "dist"
+          api_location: ""
+          output_location: ""
+          skip_app_build: true
+          skip_api_build: true
+          production_branch: "main"
+      - name: Verify published contents
+        env:
+          DEPLOYMENT_URL: ${{ steps.builddeploy.outputs.static_web_app_url }}
+        run: node scripts/verify-deployment.mjs verify dist "$DEPLOYMENT_URL"
+      - name: Verify public domain
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: node scripts/verify-deployment.mjs verify dist https://opstoolbox.dev
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
     name: Close Pull Request Job
+    permissions: {}
     steps:
       - name: Close Pull Request
         id: closepullrequest
         uses: Azure/static-web-apps-deploy@v1
         with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_MANGO_DESERT_0542AC90F }}
           action: "close"
