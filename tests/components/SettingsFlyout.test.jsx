@@ -3,12 +3,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import SettingsFlyout from '../../src/components/SettingsFlyout';
 import { THEMES } from '../../src/hooks/useTheme';
 
-const THEMES = [
-  { value: 'system', label: 'System' },
-  { value: 'light', label: 'Light' },
-  { value: 'dark', label: 'Dark' },
-];
-
 function makeProps(overrides = {}) {
   return {
     theme: {

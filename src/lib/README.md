@@ -24,6 +24,7 @@ Pure utility functions with zero React dependencies. Each module exports functio
 |--------|---------|
 | `toolRegistry.js` | Canonical tool metadata and query helpers |
 | `password.js` | Cryptographic password/passphrase generation (rejection sampling) |
+| `secretBatch.js` | CSV serialization for generated secret batches |
 | `subnet.js` | IPv4 CIDR math, subnet info, and interactive tree model |
 | `epochUtils.js` | Unix epoch ↔ human date conversion with timezone support |
 | `csvToJson.js` | CSV parsing wrapper (PapaParse) with delimiter detection |
@@ -43,6 +44,9 @@ Pure utility functions with zero React dependencies. Each module exports functio
 | `x509.js` | X.509 PEM certificate parsing (pkijs/asn1js) |
 | `urlEncoder.js` | URL component encoding/decoding |
 | `wordlist.js` | EFF short wordlist (1296 words) for passphrases |
+| `wordlists.js` | Passphrase wordlist metadata and lazy-loading entrypoint |
+| `wordlist-eff-long.js` | Canonical EFF long wordlist (7776 words) |
+| `wordlist-diceware.js` | Canonical original Diceware/Reinhold list (7776 entries) |
 
 ---
 

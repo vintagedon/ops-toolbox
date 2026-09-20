@@ -76,9 +76,34 @@ Single-page application with React Router v6. Tools are lazy-loaded via `React.l
 - Do not use `backdrop-filter` / `backdrop-blur` anywhere except the sticky header
 - Do not load fonts from an external CDN (Google Fonts) — fonts are bundled via `@fontsource-variable`; the air-gap claim must survive a DevTools Network-tab check
 
-## Specs
+## Executing a Work Spec
 
-Feature specifications live at the agents root (`/opt/agents/repos/spec/`), archived by month after execution (`spec/2026-MM/`). These are reference documents for completed work:
+Specs for this repository live in-repo at `docs/specs/` and execute in repo mode.
+
+| Element | Convention |
+|---------|-----------|
+| Spec | `docs/specs/spec-m<major>-<minor>-<slug>.md` |
+| Tracking | One GitHub issue per task. The issue is a stable pointer; the spec is what iterates |
+| Branch | `task/<major>-<minor>-<slug>` |
+| Gates | One commit per gate, each referencing its gate number (for example `fix(build): track package-lock.json (1.0.2)`) |
+| Worklog | `work-logs/worklog-YYYY-MM-DD-<slug>.md`, appended at each gate, sealed at close |
+| Review surface | `docs/specs/reviews/review-m<major>-<minor>-<slug>.md`, where the spec ends at an operator decision |
+| Close | One pull request carrying `Closes #N`, CI green |
+
+Data decisions first, architecture second, in both commits and the worklog.
+
+**Push posture.** This is a public repository. Gates commit locally and the operator reviews before push. The executor does not push `main`, does not mark a pull request ready, and does not merge.
+
+**Platform-mode work** targeting shared infrastructure or the project wiki stays in the agents-root queue and follows the `spec-startup` and `spec-closeout` skills. A GitHub wiki has no issues and no pull requests, so it cannot run in repo mode.
+
+### Active specs
+
+- `docs/specs/spec-m1-0-release-hardening.md` (Task 1.0): lockfile and clean-clone Docker build, browser smoke suite, CSP asserted by value, licensing, identity and version reconciliation
+- `docs/specs/spec-m1-1-tool-documentation.md` (Task 1.1): per-tool reference docs against a template, registry-driven completeness gate, docs index, self-hosting guide
+
+### Archived specs
+
+Earlier specifications live at the agents root (`/opt/agents/repos/spec/2026-MM/`) and are reference documents for completed work:
 
 - `2026-06/2026-06-21-opstoolbox-spec-01-sentinel-pattern-maturation.md` — `data-theme` mechanism, High-Contrast Slate, accessibility baseline, StatusBadge, typography discipline
 - `2026-06/2026-06-24-opstoolbox-spec-01-launch-ux.md` — MAC removal, scannable directory, social cards, `/about`, scaffolding
@@ -104,7 +129,8 @@ ops-toolbox/
 ├── docs/
 │   ├── apps/                       # Tool reference documentation
 │   ├── design/                     # Contrast standard, typography roles
-│   └── documentation-standards/    # Templates, tagging strategy
+│   ├── documentation-standards/    # Templates, tagging strategy
+│   └── specs/                      # In-repo work specs and review surfaces
 ├── internal-files/                 # Working documents (contents gitignored)
 ├── plans/                          # Development planning
 ├── public/                         # Build-served static assets (logo, favicon, og card, robots.txt)

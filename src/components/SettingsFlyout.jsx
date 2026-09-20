@@ -9,16 +9,20 @@
 import { useState, useRef, useEffect } from 'react';
 
 /**
- * Segmented control for 2-3 options.
+ * Segmented control for 2-3 options. Fills the width of its container and
+ * divides it evenly among the options rather than sizing to its labels, so a
+ * long label cannot push the control past the edge of the flyout. Each cell
+ * truncates rather than growing, which keeps the layout stable under the
+ * monospace font preference where labels are widest.
  */
 function SegmentedControl({ options, value, onChange }) {
   return (
-    <div className="inline-flex p-0.5 bg-surface-2 border border-border rounded-md">
+    <div className="flex w-full p-0.5 bg-surface-2 border border-border rounded-md">
       {options.map((opt) => (
         <button
           key={opt.value}
           onClick={() => onChange(opt.value)}
-          className={`px-3 py-1.5 text-xs font-medium rounded transition-micro ${
+          className={`flex-1 min-w-0 truncate px-1.5 py-1.5 text-xs font-medium rounded transition-micro ${
             value === opt.value
               ? 'bg-surface-1 text-text-primary shadow-sm ring-1 ring-border-subtle'
               : 'text-text-secondary hover:text-text-primary'
@@ -115,7 +119,7 @@ export default function SettingsFlyout({ theme, density, fontFamily }) {
       {open && (
         <div
           ref={flyoutRef}
-          className="absolute right-0 top-full mt-2 w-64 bg-surface-1 border border-border rounded-md shadow-sm p-4 space-y-4 z-50 transition-enter"
+          className="absolute right-0 top-full mt-2 w-80 bg-surface-1 border border-border rounded-md shadow-sm p-4 space-y-4 z-50 transition-enter"
           role="dialog"
           aria-label="Display settings"
         >

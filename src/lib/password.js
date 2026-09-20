@@ -19,6 +19,30 @@ const POOLS = {
 };
 
 /**
+ * Selects uniformly random characters from a string using byte rejection sampling.
+ *
+ * @param {number} length - Number of characters to select
+ * @param {string} charset - Source character pool
+ * @returns {string} Random characters
+ */
+function generateRandomCharacters(length, charset) {
+  const poolSize = charset.length;
+  const maxValid = 256 - (256 % poolSize);
+
+  let result = '';
+  while (result.length < length) {
+    const randomValues = window.crypto.getRandomValues(new Uint8Array(Math.max(length * 2, 1)));
+    for (let i = 0; i < randomValues.length && result.length < length; i++) {
+      if (randomValues[i] < maxValid) {
+        result += charset[randomValues[i] % poolSize];
+      }
+    }
+  }
+
+  return result;
+}
+
+/**
  * Generates a random password using Web Crypto API
  * @param {number} length - Desired password length
  * @param {object} options - { uppercase, lowercase, numeric, special } booleans
@@ -29,25 +53,7 @@ export function generatePassword(length, options) {
   if (!charset) {
     throw new Error('At least one character set must be enabled');
   }
-
-  const poolSize = charset.length;
-  // Rejection sampling: discard random bytes >= maxValid to eliminate modulo bias.
-  // Without this, characters at the start of the charset would appear slightly more often.
-  const maxValid = 256 - (256 % poolSize);
-
-  let password = '';
-  while (password.length < length) {
-    // Request 2x bytes to reduce the chance of needing another round
-    const randomValues = window.crypto.getRandomValues(new Uint8Array(length * 2));
-    for (let i = 0; i < randomValues.length && password.length < length; i++) {
-      if (randomValues[i] < maxValid) {
-        password += charset[randomValues[i] % poolSize];
-      }
-      // Rejected bytes are discarded — this is the core of rejection sampling
-    }
-  }
-
-  return password;
+  return generateRandomCharacters(length, charset);
 }
 
 /**
@@ -61,9 +67,30 @@ export function calculateEntropy(length, poolSize) {
   return Math.floor(length * Math.log2(poolSize));
 }
 
-/** Generate a passphrase by picking random words from the EFF wordlist via rejection sampling */
-export function generatePassphrase(wordCount, separator = '-', capitalize = false) {
-  const wordlist = EFF_SHORT_WORDLIST;
+/**
+ * Generate a passphrase by picking random words via rejection sampling.
+ *
+ * @param {number} wordCount - Number of words to generate
+ * @param {string} separator - Text placed between words
+ * @param {boolean} capitalize - Whether to capitalize each selected word
+ * @param {string[]} wordlist - Source list; defaults to EFF Short 2.0
+ * @param {number} paddingDigits - Uniformly random digits to append
+ * @returns {string} Generated passphrase
+ */
+export function generatePassphrase(
+  wordCount,
+  separator = '-',
+  capitalize = false,
+  wordlist = EFF_SHORT_WORDLIST,
+  paddingDigits = 0,
+) {
+  if (!Array.isArray(wordlist) || wordlist.length === 0) {
+    throw new Error('A non-empty wordlist is required');
+  }
+  if (!Number.isInteger(paddingDigits) || paddingDigits < 0) {
+    throw new Error('Padding digit count must be a non-negative integer');
+  }
+
   const poolSize = wordlist.length;
   // Same rejection sampling as generatePassword, but over Uint32 range (4294967296 = 2^32)
   const maxValid = 4294967296 - (4294967296 % poolSize);
@@ -80,12 +107,61 @@ export function generatePassphrase(wordCount, separator = '-', capitalize = fals
     }
   }
 
-  return words.join(separator);
+  const phrase = words.join(separator);
+  return phrase + generateRandomCharacters(paddingDigits, POOLS.numeric);
 }
 
-export function calculatePassphraseEntropy(wordCount, wordlistSize) {
+/**
+ * Calculates passphrase entropy, including uniformly random numeric padding.
+ *
+ * @param {number} wordCount - Number of independently selected words
+ * @param {number} wordlistSize - Number of entries in the selected wordlist
+ * @param {number} paddingDigits - Number of independently selected base-10 digits
+ * @returns {number} Whole entropy bits, rounded down for display
+ */
+export function calculatePassphraseEntropy(wordCount, wordlistSize, paddingDigits = 0) {
   if (wordCount === 0 || !wordlistSize) return 0;
-  return Math.floor(wordCount * Math.log2(wordlistSize));
+  return Math.floor((wordCount * Math.log2(wordlistSize)) + (paddingDigits * Math.log2(10)));
+}
+
+/**
+ * Generates a batch while rejecting duplicate values.
+ *
+ * @param {number} count - Number of distinct results requested
+ * @param {() => string} generateValue - Cryptographic value generator
+ * @param {number|((value: string) => number)} entropyForValue - Entropy value or calculator
+ * @returns {{value: string, entropy: number}[]} Generated rows
+ */
+export function generateBatch(count, generateValue, entropyForValue) {
+  if (!Number.isInteger(count) || count < 1) {
+    throw new Error('Batch count must be a positive integer');
+  }
+  if (typeof generateValue !== 'function') {
+    throw new Error('Batch generation requires a value generator');
+  }
+
+  const results = [];
+  const seen = new Set();
+  const maxAttempts = Math.max(100, count * 100);
+  let attempts = 0;
+
+  while (results.length < count && attempts < maxAttempts) {
+    const value = generateValue();
+    attempts += 1;
+    if (seen.has(value)) continue;
+
+    seen.add(value);
+    results.push({
+      value,
+      entropy: typeof entropyForValue === 'function' ? entropyForValue(value) : entropyForValue,
+    });
+  }
+
+  if (results.length !== count) {
+    throw new Error('Unable to generate the requested number of distinct values');
+  }
+
+  return results;
 }
 
 /**
