@@ -27,3 +27,8 @@ Authority: operator-approved repair in the Codex task. No feature merge or push 
 - Workflow YAML parsed and `git diff --check` passed.
 - Independent review found no actionable issues.
 - Live deployment evidence will be appended after publication.
+
+## Execution findings
+
+- The first fresh repair run stopped before deployment because Node 22's bundled npm 10.9.8 crashed resolving dependencies (`edgesOut`). Pin npm to 12.0.2, the version used by the successful clean local install, tests, and build.
+- Temporary nested worktrees caused duplicate local test discovery. Moved the agent-created worktrees to sibling directories within `/opt/agents/repos`; the feature checkout then passed all 505 tests across 59 files. No application fix was required.
