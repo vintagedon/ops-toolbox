@@ -198,8 +198,27 @@ describe('generatePassphrase', () => {
   });
 
   it('rejects invalid numeric padding counts', () => {
-    expect(() => generatePassphrase(3, '-', false, ['alpha'], -1)).toThrow('Padding digit count must be a non-negative integer');
-    expect(() => generatePassphrase(3, '-', false, ['alpha'], 1.5)).toThrow('Padding digit count must be a non-negative integer');
+    expect(() => generatePassphrase(3, '-', false, ['alpha'], -1)).toThrow('Padding digit count must be an integer between 0 and 12');
+    expect(() => generatePassphrase(3, '-', false, ['alpha'], 1.5)).toThrow('Padding digit count must be an integer between 0 and 12');
+  });
+
+  it('rejects padding counts above the advertised bound with a range error', () => {
+    expect(() => generatePassphrase(3, '-', false, ['alpha'], 13)).toThrow(RangeError);
+    expect(() => generatePassphrase(3, '-', false, ['alpha'], 13)).toThrow('Padding digit count must be an integer between 0 and 12');
+    expect(() => generatePassphrase(3, '-', false, ['alpha'], 32769)).toThrow(RangeError);
+  });
+
+  it('throws the padding range error before any Web Crypto call', () => {
+    const getRandomValues = vi.spyOn(window.crypto, 'getRandomValues');
+    getRandomValues.mockClear();
+    expect(() => generatePassphrase(3, '-', false, ['alpha'], 13)).toThrow(RangeError);
+    expect(() => generatePassphrase(3, '-', false, ['alpha'], 32769)).toThrow(RangeError);
+    expect(getRandomValues).not.toHaveBeenCalled();
+  });
+
+  it('accepts the bound edges: 12 digits or none', () => {
+    expect(generatePassphrase(3, '-', false, ['alpha'], 12)).toMatch(/^alpha-alpha-alpha\d{12}$/);
+    expect(generatePassphrase(3, '-', false, ['alpha'], 0)).toMatch(/^alpha-alpha-alpha$/);
   });
 
   it('two consecutive calls produce different results', () => {

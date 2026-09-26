@@ -19,6 +19,11 @@ const POOLS = {
 };
 
 /**
+ * Upper bound of the advertised 1-12 padding digit range; 0 disables padding.
+ */
+export const MAX_PADDING_DIGITS = 12;
+
+/**
  * Selects uniformly random characters from a string using byte rejection sampling.
  *
  * @param {number} length - Number of characters to select
@@ -87,8 +92,8 @@ export function generatePassphrase(
   if (!Array.isArray(wordlist) || wordlist.length === 0) {
     throw new Error('A non-empty wordlist is required');
   }
-  if (!Number.isInteger(paddingDigits) || paddingDigits < 0) {
-    throw new Error('Padding digit count must be a non-negative integer');
+  if (!Number.isInteger(paddingDigits) || paddingDigits < 0 || paddingDigits > MAX_PADDING_DIGITS) {
+    throw new RangeError('Padding digit count must be an integer between 0 and 12');
   }
 
   const poolSize = wordlist.length;

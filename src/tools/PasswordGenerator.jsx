@@ -7,7 +7,7 @@
  */
 
 import { useState, useEffect, useRef } from 'react';
-import { generatePassword, calculateEntropy, buildCharset, generatePassphrase, calculatePassphraseEntropy, generateBatch } from '../lib/password.js';
+import { generatePassword, calculateEntropy, buildCharset, generatePassphrase, calculatePassphraseEntropy, generateBatch, MAX_PADDING_DIGITS } from '../lib/password.js';
 import { serializeSecretBatchCsv } from '../lib/secretBatch.js';
 import { DEFAULT_WORDLIST_ID, WORDLIST_OPTIONS, SEPARATOR_OPTIONS, evaluateSeparatorPolicy, loadWordlist } from '../lib/wordlists.js';
 import { useClipboard } from '../hooks/useClipboard';
@@ -324,10 +324,14 @@ export default function PasswordGenerator() {
                     id="padding-digits"
                     type="number"
                     min="1"
-                    max="12"
+                    max={MAX_PADDING_DIGITS}
                     value={paddingDigits}
                     disabled={!numericPaddingEnabled}
-                    onChange={(e) => setPaddingDigits(Number.parseInt(e.target.value, 10) || 1)}
+                    onChange={(e) => {
+                      const parsed = Number.parseInt(e.target.value, 10);
+                      const next = Number.isNaN(parsed) ? 1 : parsed;
+                      setPaddingDigits(Math.min(MAX_PADDING_DIGITS, Math.max(1, next)));
+                    }}
                     className="w-24 bg-surface-2 text-text-primary rounded-md px-3 py-2 border border-border-subtle disabled:opacity-50"
                   />
                 </div>
