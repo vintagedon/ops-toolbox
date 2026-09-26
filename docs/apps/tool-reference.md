@@ -81,9 +81,13 @@ Users, contributors, and AI coding assistants working in this repository.
 | | |
 |---|---|
 | **Route** | `/password-generator` |
-| **Source** | `src/tools/PasswordGenerator.jsx` + `src/lib/password.js` |
+| **Source** | `src/tools/PasswordGenerator.jsx` + `src/lib/password.js` + `src/lib/wordlists.js` + `src/lib/secretBatch.js` |
 | **Mode** | Local |
-| **Description** | Two modes: random passwords (8–128 chars, configurable character pools) and passphrases (3–12 words from EFF short wordlist). Uses Web Crypto API with **rejection sampling** to eliminate modulo bias. Displays entropy in bits with strength indicator. |
+| **Description** | Two modes: random passwords (8–128 chars, configurable character pools) and passphrases. Uses Web Crypto API with **rejection sampling** to eliminate modulo bias. Displays entropy in bits with strength indicator. |
+| **Word lists** | Three selectable lists, loaded lazily: EFF Short 2.0 (1,296 words, bundled), EFF Long (7,776 words), and Original Diceware (7,776 entries). Passphrase entropy is `wordCount × log2(list size)`, computed from each list's true size. |
+| **Separator policy** | Separators: hyphen, dot, underscore, space, and none. A separator is offered for a list and capitalization setting only when every offered output still maps back to exactly one word sequence (a Sardinas–Patterson unique-decodability test over the rendered list), so the displayed word entropy is the entropy of what was generated. Withdrawn combinations: the dot and none separators on Original Diceware without capitalization, and the none separator on Original Diceware with capitalization; all other list combinations keep all five separators. Withdrawn options are disabled in the selector with a one-line reason ("different word sequences could produce identical output"); if the current selection is withdrawn, it resolves to the first available separator and shows the same reason. |
+| **Numeric padding** | Optional 1–12 appended digits (0 means off). The input clamps any typed value into 1–12, and the generator refuses an out-of-range count with an error before generating. Each digit adds `log2(10)` ≈ 3.3 bits of entropy; a word from a 1,296-entry list adds about 10.3 bits and a word from a 7,776-entry list about 12.9 bits, so compare the chosen digit count against those per-word values when deciding how much padding to add. |
+| **Batch generation** | Generation count of 1–50; each value is generated independently and duplicates are rejected. Batches render as a table with per-row copy, plus Copy All (newline-joined) and Download CSV (value and entropy columns). Downloaded CSVs are unencrypted secrets on disk — store or delete them carefully. Exports are withheld while a word list loads, so every exported value was generated from the settings currently on screen. |
 
 ### SSH Keypair Generator
 
@@ -308,5 +312,5 @@ See `toolRegistry.js` for the full schema: `id`, `name`, `description`, `path`, 
 |---|---|
 | Author | vintagedon |
 | Created | 2026-03-16 |
-| Updated | 2026-03-16 |
+| Updated | 2026-09-26 |
 | Version | 1.0 |
