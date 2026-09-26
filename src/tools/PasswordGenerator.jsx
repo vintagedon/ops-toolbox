@@ -9,18 +9,12 @@
 import { useState, useEffect, useRef } from 'react';
 import { generatePassword, calculateEntropy, buildCharset, generatePassphrase, calculatePassphraseEntropy, generateBatch } from '../lib/password.js';
 import { serializeSecretBatchCsv } from '../lib/secretBatch.js';
-import { DEFAULT_WORDLIST_ID, WORDLIST_OPTIONS, loadWordlist } from '../lib/wordlists.js';
+import { DEFAULT_WORDLIST_ID, WORDLIST_OPTIONS, SEPARATOR_OPTIONS, evaluateSeparatorPolicy, loadWordlist } from '../lib/wordlists.js';
 import { useClipboard } from '../hooks/useClipboard';
 import CopyButton from '../components/CopyButton';
 import ErrorBanner from '../components/ErrorBanner';
 
-const SEPARATOR_OPTIONS = [
-  { label: 'Hyphen (-)', value: '-' },
-  { label: 'Dot (.)', value: '.' },
-  { label: 'Underscore (_)', value: '_' },
-  { label: 'Space ( )', value: ' ' },
-  { label: 'None', value: '' },
-];
+const ALL_SEPARATORS_OFFERED = SEPARATOR_OPTIONS.map((option) => ({ ...option, available: true, reason: null }));
 
 export default function PasswordGenerator() {
   const [mode, setMode] = useState('password'); // 'password' | 'passphrase'
@@ -36,6 +30,8 @@ export default function PasswordGenerator() {
   const [wordCount, setWordCount] = useState(6);
   const [wordlistId, setWordlistId] = useState(DEFAULT_WORDLIST_ID);
   const [separator, setSeparator] = useState('-');
+  const [separatorOptions, setSeparatorOptions] = useState(ALL_SEPARATORS_OFFERED);
+  const [separatorNotice, setSeparatorNotice] = useState(null);
   const [capitalize, setCapitalize] = useState(false);
   const [numericPaddingEnabled, setNumericPaddingEnabled] = useState(false);
   const [paddingDigits, setPaddingDigits] = useState(1);
@@ -58,6 +54,28 @@ export default function PasswordGenerator() {
     try {
       const wordlist = await loadWordlist(wordlistId);
       if (requestIdRef.current !== requestId) return;
+
+      // A separator is selectable only when every word sequence stays
+      // recoverable from the output; a withdrawn selection resolves to the
+      // first available separator instead of ever generating from it.
+      const offered = evaluateSeparatorPolicy(wordlist, capitalize);
+      setSeparatorOptions(offered);
+      const withdrawn = offered.filter((option) => !option.available);
+      setSeparatorNotice(withdrawn.length > 0
+        ? `Not offered with this list and capitalization: ${withdrawn.map((option) => option.label).join(', ')} — ${withdrawn[0].reason}.`
+        : null);
+      const selected = offered.find((option) => option.value === separator);
+      if (!selected.available) {
+        const fallback = offered.find((option) => option.available);
+        if (!fallback) {
+          setError('No separator can be offered for this wordlist and capitalization');
+          setResults([]);
+          return;
+        }
+        setSeparator(fallback.value);
+        return;
+      }
+
       const appliedPaddingDigits = numericPaddingEnabled ? paddingDigits : 0;
       setResults(generateBatch(
         count,
@@ -257,16 +275,20 @@ export default function PasswordGenerator() {
 
               {/* Separator selector */}
               <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">Separator</label>
+                <label htmlFor="separator-selector" className="block text-sm font-medium text-text-secondary mb-2">Separator</label>
                 <select
+                  id="separator-selector"
                   value={separator}
                   onChange={(e) => setSeparator(e.target.value)}
                   className="bg-surface-2 text-text-primary rounded-md px-3 py-2 border border-border-subtle"
                 >
-                  {SEPARATOR_OPTIONS.map(opt => (
-                    <option key={opt.label} value={opt.value}>{opt.label}</option>
+                  {separatorOptions.map((option) => (
+                    <option key={option.label} value={option.value} disabled={!option.available}>{option.label}</option>
                   ))}
                 </select>
+                {separatorNotice && (
+                  <p role="note" className="mt-2 text-sm text-status-warning">{separatorNotice}</p>
+                )}
               </div>
 
               {/* Capitalize toggle */}
