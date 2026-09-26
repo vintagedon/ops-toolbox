@@ -6,7 +6,7 @@
  * @see https://github.com/radioastronomyio/ops-toolbox
  */
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { generatePassword, calculateEntropy, buildCharset, generatePassphrase, calculatePassphraseEntropy, generateBatch } from '../lib/password.js';
 import { serializeSecretBatchCsv } from '../lib/secretBatch.js';
 import { DEFAULT_WORDLIST_ID, WORDLIST_OPTIONS, loadWordlist } from '../lib/wordlists.js';
@@ -45,64 +45,68 @@ export default function PasswordGenerator() {
   const [error, setError] = useState(null);
   const [isLoadingWordlist, setIsLoadingWordlist] = useState(false);
   const { copy, copied } = useClipboard();
+  // Incremented on every generation request and by effect cleanup; an in-flight
+  // load applies its state only while its request is still the newest one.
+  const requestIdRef = useRef(0);
   const output = results[0]?.value ?? '';
   const entropy = results[0]?.entropy ?? 0;
 
+  const generatePassphraseResults = async () => {
+    const requestId = ++requestIdRef.current;
+    setIsLoadingWordlist(true);
+    setError(null);
+    try {
+      const wordlist = await loadWordlist(wordlistId);
+      if (requestIdRef.current !== requestId) return;
+      const appliedPaddingDigits = numericPaddingEnabled ? paddingDigits : 0;
+      setResults(generateBatch(
+        count,
+        () => generatePassphrase(wordCount, separator, capitalize, wordlist, appliedPaddingDigits),
+        calculatePassphraseEntropy(wordCount, wordlist.length, appliedPaddingDigits),
+      ));
+    } catch (err) {
+      if (requestIdRef.current !== requestId) return;
+      setError(err.message);
+      setResults([]);
+    } finally {
+      if (requestIdRef.current === requestId) {
+        setIsLoadingWordlist(false);
+      }
+    }
+  };
+
   // Auto-generate on any option change; entropy = log2(charset^length)
   useEffect(() => {
-    let active = true;
-
-    const generate = async () => {
-      if (mode === 'password') {
-        const options = { uppercase, lowercase, numeric, special };
-        const charset = buildCharset(options);
-        if (length && charset) {
-          try {
-            setResults(generateBatch(
-              count,
-              () => generatePassword(length, options),
-              (value) => calculateEntropy(value.length, charset.length),
-            ));
-            setError(null);
-          } catch (err) {
-            setError(err.message);
-            setResults([]);
-          }
-        } else {
-          setError('Enable at least one character set');
+    if (mode === 'password') {
+      const options = { uppercase, lowercase, numeric, special };
+      const charset = buildCharset(options);
+      if (length && charset) {
+        try {
+          setResults(generateBatch(
+            count,
+            () => generatePassword(length, options),
+            (value) => calculateEntropy(value.length, charset.length),
+          ));
+          setError(null);
+        } catch (err) {
+          setError(err.message);
           setResults([]);
         }
-        setIsLoadingWordlist(false);
-        return;
-      }
-
-      setIsLoadingWordlist(true);
-      setError(null);
-      try {
-        const wordlist = await loadWordlist(wordlistId);
-        if (!active) return;
-        const appliedPaddingDigits = numericPaddingEnabled ? paddingDigits : 0;
-        setResults(generateBatch(
-          count,
-          () => generatePassphrase(wordCount, separator, capitalize, wordlist, appliedPaddingDigits),
-          calculatePassphraseEntropy(wordCount, wordlist.length, appliedPaddingDigits),
-        ));
-      } catch (err) {
-        if (!active) return;
-        setError(err.message);
+      } else {
+        setError('Enable at least one character set');
         setResults([]);
-      } finally {
-        if (active) setIsLoadingWordlist(false);
       }
-    };
+      setIsLoadingWordlist(false);
+      return;
+    }
 
-    generate();
+    generatePassphraseResults();
     return () => {
-      active = false;
+      requestIdRef.current += 1;
     };
   }, [mode, length, uppercase, lowercase, numeric, special, wordCount, wordlistId, separator, capitalize, numericPaddingEnabled, paddingDigits, count]);
 
-  const handleRegenerate = async () => {
+  const handleRegenerate = () => {
     if (mode === 'password') {
       const options = { uppercase, lowercase, numeric, special };
       const charset = buildCharset(options);
@@ -120,22 +124,7 @@ export default function PasswordGenerator() {
         }
       }
     } else {
-      setIsLoadingWordlist(true);
-      try {
-        const wordlist = await loadWordlist(wordlistId);
-        const appliedPaddingDigits = numericPaddingEnabled ? paddingDigits : 0;
-        setResults(generateBatch(
-          count,
-          () => generatePassphrase(wordCount, separator, capitalize, wordlist, appliedPaddingDigits),
-          calculatePassphraseEntropy(wordCount, wordlist.length, appliedPaddingDigits),
-        ));
-        setError(null);
-      } catch (err) {
-        setError(err.message);
-        setResults([]);
-      } finally {
-        setIsLoadingWordlist(false);
-      }
+      generatePassphraseResults();
     }
   };
 
@@ -352,7 +341,7 @@ export default function PasswordGenerator() {
             {count === 1 ? (
               <button
                 onClick={() => copy(output)}
-                disabled={!output || copied}
+                disabled={!output || copied || isLoadingWordlist}
                 className="px-6 py-3 bg-accent hover:bg-accent-hover border-accent text-black rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {copied ? 'Copied!' : 'Copy to Clipboard'}
@@ -361,14 +350,14 @@ export default function PasswordGenerator() {
               <>
                 <button
                   onClick={() => copy(results.map(({ value }) => value).join('\n'))}
-                  disabled={results.length === 0 || copied}
+                  disabled={isLoadingWordlist || results.length === 0 || copied}
                   className="px-6 py-3 bg-accent hover:bg-accent-hover border-accent text-black rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {copied ? 'Copied!' : 'Copy All'}
                 </button>
                 <button
                   onClick={handleDownloadCsv}
-                  disabled={results.length === 0}
+                  disabled={isLoadingWordlist || results.length === 0}
                   className="px-6 py-3 bg-surface-2 hover:bg-surface-3 border border-border-subtle text-text-primary rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Download CSV
@@ -436,7 +425,7 @@ export default function PasswordGenerator() {
             </>
           )}
 
-          {results.length > 1 && (
+          {results.length > 1 && !isLoadingWordlist && (
             <>
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-text-primary mb-2">
