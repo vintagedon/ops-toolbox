@@ -5,7 +5,7 @@ Entry point for AI coding agents working on this repository.
 ## Project Identity
 
 **Domain:** IT Operations / Web Utilities
-**Repository:** https://github.com/radioastronomyio/ops-toolbox
+**Repository:** https://github.com/vintagedon/ops-toolbox
 **Live:** https://opstoolbox.dev/
 **Purpose:** A collection of 24 client-side utility web tools for IT operations and platform engineering. All processing happens in the browser; no backends, no data transmission. Hosted on Azure Static Web Apps.
 
@@ -37,7 +37,7 @@ Single-page application with React Router v6. Tools are lazy-loaded via `React.l
 - **Pure logic** in `src/lib/` tested in `tests/lib/` (fast, no DOM)
 - **React components** tested in `tests/tools/`, `tests/components/`, `tests/hooks/`
 - **Pattern absence tests** in `tests/migration/` ensure banned patterns (hand-rolled clipboard, manual debounce) don't recur
-- **Run:** `npm run test` (single run, 474 tests across 56 files) or `npm run test:watch`
+- **Run:** `npm run test` (single run) or `npm run test:watch`
 
 ## Documentation
 
@@ -46,7 +46,7 @@ Single-page application with React Router v6. Tools are lazy-loaded via `React.l
 - **`docs/design/contrast-standard.md`** — WCAG AA contrast rule every palette is audited against
 - **`docs/design/typography-roles.md`** — UI/mono type roles, the type scale, and the micro-label convention
 - **`docs/documentation-standards/`** — Template library for READMEs, KB articles, script headers
-- All source files have JSDoc `@file` headers per `docs/documentation-standards/script-header-javascript.md`
+- All source files have JSDoc `@file` headers; header templates live in `docs/documentation-standards/`
 
 ## Key Constraints
 
@@ -78,7 +78,7 @@ Single-page application with React Router v6. Tools are lazy-loaded via `React.l
 
 ## Executing a Work Spec
 
-Specs for this repository live in-repo at `docs/specs/` and execute in repo mode.
+When this repository runs a spec in repo mode, specs live in-repo at `docs/specs/` and the table below applies. There are currently no in-repo specs: `docs/specs/` does not exist yet, and whether the next ops-toolbox spec uses this convention or the central agents-root queue is an open decision.
 
 | Element | Convention |
 |---------|-----------|
@@ -98,8 +98,7 @@ Data decisions first, architecture second, in both commits and the worklog.
 
 ### Active specs
 
-- `docs/specs/spec-m1-0-release-hardening.md` (Task 1.0): lockfile and clean-clone Docker build, browser smoke suite, CSP asserted by value, licensing, identity and version reconciliation
-- `docs/specs/spec-m1-1-tool-documentation.md` (Task 1.1): per-tool reference docs against a template, registry-driven completeness gate, docs index, self-hosting guide
+None. There are no in-repo specs under `docs/specs/`.
 
 ### Archived specs
 
@@ -108,7 +107,9 @@ Earlier specifications live at the agents root (`/opt/agents/repos/spec/2026-MM/
 - `2026-06/2026-06-21-opstoolbox-spec-01-sentinel-pattern-maturation.md` — `data-theme` mechanism, High-Contrast Slate, accessibility baseline, StatusBadge, typography discipline
 - `2026-06/2026-06-24-opstoolbox-spec-01-launch-ux.md` — MAC removal, scannable directory, social cards, `/about`, scaffolding
 - `2026-06/2026-06-24-opstoolbox-spec-02-oss-readiness.md` — markdownify README, self-host Docker image with SPA-aware nginx, OG social card
+- `2026-06/2026-06-24-opstoolbox-spec-03-passphrase-depth.md` — lazy-loaded EFF Long and original Diceware wordlists, honest numeric padding entropy, batch generation with CSV export
 - `2026-06/2026-06-25-opstoolbox-spec-05-fonts-and-discoverability.md` — bundled `@fontsource-variable` fonts, build-time `sitemap.xml`/`llms.txt`/`robots.txt`, docs sweep
+- `2026-07/2026-07-24-opstoolbox-spec-01-wiki-explainers.md` — GitHub wiki navigation and four evergreen explainer pages (platform-mode work, executed against the wiki clone)
 - Earlier work (original tool implementations, v3 architecture fixes, primitives migration, v4 design system) predates the agents-root spec archive.
 
 ## Execution Environment
@@ -129,8 +130,7 @@ ops-toolbox/
 ├── docs/
 │   ├── apps/                       # Tool reference documentation
 │   ├── design/                     # Contrast standard, typography roles
-│   ├── documentation-standards/    # Templates, tagging strategy
-│   └── specs/                      # In-repo work specs and review surfaces
+│   └── documentation-standards/    # Templates, tagging strategy
 ├── internal-files/                 # Working documents (contents gitignored)
 ├── plans/                          # Development planning
 ├── public/                         # Build-served static assets (logo, favicon, og card, robots.txt)
