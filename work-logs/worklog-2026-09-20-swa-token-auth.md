@@ -1,3 +1,21 @@
+<!--
+---
+title: "Azure SWA Deployment Repair - 2026-09-20"
+description: "Worklog of the deployment-token authorization repair, verified preview and production runs, and recovery notes"
+author: "VintageDon (https://github.com/vintagedon/)"
+date: "2026-09-20"
+version: "1.0"
+status: "Archived"
+tags:
+  - type: worklog
+  - domain: documentation
+  - tech: [azure-swa, vitest]
+related_documents:
+  - "[Deployment scripts README](../scripts/README.md)"
+  - "[Deployment verification tests](../tests/scripts/README.md)"
+---
+-->
+
 # Azure SWA deployment repair — 2026-09-20
 
 Authority: operator-approved repair in the Codex task. No feature merge or push to main is authorized.
