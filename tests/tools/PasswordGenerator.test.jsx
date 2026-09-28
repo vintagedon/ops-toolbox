@@ -60,9 +60,12 @@ describe('PasswordGenerator', () => {
   it('passphrase mode generates output with word separators', async () => {
     render(<PasswordGenerator />);
     fireEvent.click(screen.getByText('Passphrase'));
-    const pre = await waitFor(() => document.querySelector('pre.font-mono'));
-    expect(pre).toBeInTheDocument();
-    expect(pre.textContent).toMatch(/-/);
+    await waitFor(() => {
+      expect(screen.queryByText(/loading selected wordlist/i)).not.toBeInTheDocument();
+      const pre = document.querySelector('pre.font-mono');
+      expect(pre).toBeInTheDocument();
+      expect(pre.textContent).toMatch(/-/);
+    });
   });
 
   it('offers all published wordlists and updates entropy for a larger list', async () => {

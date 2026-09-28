@@ -336,7 +336,7 @@ export default function PasswordGenerator() {
                   />
                 </div>
                 <p className="text-sm text-text-secondary">
-                  Numeric padding helps satisfy password rules, but it adds far less strength than adding another word.
+                  Numeric padding helps satisfy password rules. Each random digit adds about 3.3 bits of entropy; another word adds about 10–13 bits, depending on the wordlist.
                 </p>
               </div>
             </>
@@ -422,7 +422,7 @@ export default function PasswordGenerator() {
             </div>
           )}
 
-          {output && count === 1 && (
+          {output && count === 1 && !isLoadingWordlist && (
             <>
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-text-primary mb-4">Generated {mode === 'passphrase' ? 'Passphrase' : 'Password'}</h2>

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
 import PasswordGenerator from '../../src/tools/PasswordGenerator.jsx';
 import { loadWordlist } from '../../src/lib/wordlists.js';
 
@@ -107,7 +107,7 @@ describe('PasswordGenerator export gating and load races', () => {
     copiedValues.forEach((value) => expect(value).toMatch(BRAVO_PHRASE));
   });
 
-  it('withholds single-result copy while a wordlist load is pending and copies only the new value after', async () => {
+  it('hides stale single results and withholds copy until the new wordlist loads', async () => {
     render(<PasswordGenerator />);
     fireEvent.click(screen.getByText('Passphrase'));
 
@@ -121,6 +121,9 @@ describe('PasswordGenerator export gating and load races', () => {
 
     const copyButton = screen.getByRole('button', { name: 'Copy to Clipboard' });
     expect(copyButton).toBeDisabled();
+    expect(outputText()).toBe('');
+    expect(screen.queryByText('Generated Passphrase')).not.toBeInTheDocument();
+    expect(screen.queryByText('Password Entropy')).not.toBeInTheDocument();
     fireEvent.click(copyButton);
     expect(writeText).not.toHaveBeenCalled();
 
@@ -135,7 +138,7 @@ describe('PasswordGenerator export gating and load races', () => {
     expect(writeText.mock.calls[0][0]).toMatch(BRAVO_PHRASE);
   });
 
-  it('race: a late Regenerate load never replaces newer results', async () => {
+  it.each(['resolve', 'reject'])('race: a late Regenerate %s never replaces newer results', async (outcome) => {
     render(<PasswordGenerator />);
     fireEvent.click(screen.getByText('Passphrase'));
 
@@ -155,10 +158,13 @@ describe('PasswordGenerator export gating and load races', () => {
     await waitFor(() => expect(outputText()).toMatch(BRAVO_PHRASE));
     expect(screen.queryByText(/loading selected wordlist/i)).not.toBeInTheDocument();
 
-    regenerateCall.deferred.resolve(ALPHA);
-    await waitFor(() => expect(screen.queryByText(/loading selected wordlist/i)).not.toBeInTheDocument());
+    await act(async () => {
+      if (outcome === 'resolve') regenerateCall.deferred.resolve(ALPHA);
+      else regenerateCall.deferred.reject(new Error('stale failure'));
+    });
     expect(outputText()).toMatch(BRAVO_PHRASE);
     expect(screen.queryByText(/loading selected wordlist/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/stale failure/)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Copy to Clipboard' }));
     await waitFor(() => expect(writeText).toHaveBeenCalledOnce());
@@ -166,7 +172,7 @@ describe('PasswordGenerator export gating and load races', () => {
     expect(writeText.mock.calls[0][0]).toMatch(BRAVO_PHRASE);
   });
 
-  it('race: stale success, error, and finally paths leave the newer pending load intact', async () => {
+  it.each(['resolve', 'reject'])('race: a stale %s leaves the newer pending load intact', async (outcome) => {
     render(<PasswordGenerator />);
     fireEvent.click(screen.getByText('Passphrase'));
 
@@ -183,22 +189,19 @@ describe('PasswordGenerator export gating and load races', () => {
     await waitFor(() => expect(loadWordlist).toHaveBeenCalledWith('eff-long'));
     expect(screen.getByRole('button', { name: 'Copy to Clipboard' })).toBeDisabled();
 
-    regenerateCall.deferred.resolve(ALPHA);
-    await waitFor(() => {
-      expect(outputText()).toMatch(ALPHA_PHRASE);
-      expect(screen.getByText(/loading selected wordlist/i)).toBeInTheDocument();
-      expect(screen.getByRole('button', { name: 'Copy to Clipboard' })).toBeDisabled();
+    await act(async () => {
+      if (outcome === 'resolve') regenerateCall.deferred.resolve(ALPHA);
+      else regenerateCall.deferred.reject(new Error('stale failure'));
     });
+    expect(outputText()).toBe('');
+    expect(screen.getByText(/loading selected wordlist/i)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Copy to Clipboard' })).toBeDisabled();
+    expect(screen.queryByText(/stale failure/)).not.toBeInTheDocument();
 
-    regenerateCall.deferred.reject(new Error('stale failure'));
-    await waitFor(() => {
-      expect(outputText()).toMatch(ALPHA_PHRASE);
-      expect(screen.getByText(/loading selected wordlist/i)).toBeInTheDocument();
-      expect(screen.queryByText(/stale failure/)).not.toBeInTheDocument();
+    await act(async () => {
+      lastCallFor('eff-long').deferred.reject(new Error('current failure'));
     });
-
-    lastCallFor('eff-long').deferred.reject(new Error('current failure'));
-    await waitFor(() => expect(screen.getByText(/current failure/)).toBeInTheDocument());
+    expect(screen.getByText(/current failure/)).toBeInTheDocument();
     expect(screen.queryByText(/loading selected wordlist/i)).not.toBeInTheDocument();
     expect(outputText()).toBe('');
     expect(screen.getByRole('button', { name: 'Copy to Clipboard' })).toBeDisabled();
