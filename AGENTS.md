@@ -78,7 +78,7 @@ Single-page application with React Router v6. Tools are lazy-loaded via `React.l
 
 ## Executing a Work Spec
 
-When this repository runs a spec in repo mode, specs live in-repo at `docs/specs/` and the table below applies. There are currently no in-repo specs: `docs/specs/` does not exist yet, and whether the next ops-toolbox spec uses this convention or the central agents-root queue is an open decision.
+Repository work uses the in-repo specifications at `docs/specs/` and the table below. The November 14 weekend specifications are drafts for review; preparation does not dispatch feature implementation.
 
 | Element | Convention |
 |---------|-----------|
@@ -98,7 +98,7 @@ Data decisions first, architecture second, in both commits and the worklog.
 
 ### Active specs
 
-None. There are no in-repo specs under `docs/specs/`.
+None executing. Drafts for dependency maintenance, Sentinel workspace, Text Transformer, cloud subnet planning, and release editions are indexed in [docs/specs/README.md](docs/specs/README.md).
 
 ### Archived specs
 
@@ -114,7 +114,7 @@ Earlier specifications live at the agents root (`/opt/agents/repos/spec/2026-MM/
 
 ## Execution Environment
 
-**Primary execution:** ML01 (`/opt/agents/repos/ops-toolbox/`)
+**Primary execution:** ML01a (`/opt/agents/repos/ops-toolbox/`)
 **Agent runtime:** OpenCode (global config at `~/.config/opencode/opencode.json`)
 **Session management:** aoe (Agent of Empires)
 **Strategic work:** Claude.ai Projects
@@ -128,6 +128,7 @@ ops-toolbox/
 │   └── workflows/                  # Azure Static Web Apps CI/CD
 ├── assets/                         # Repository images (logo source copy)
 ├── docs/
+│   ├── specs/                      # Drafts and executable repository work specs
 │   ├── apps/                       # Tool reference documentation
 │   ├── design/                     # Contrast standard, typography roles
 │   └── documentation-standards/    # Templates, tagging strategy

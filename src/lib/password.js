@@ -125,7 +125,7 @@ export function generatePassphrase(
  * @returns {number} Whole entropy bits, rounded down for display
  */
 export function calculatePassphraseEntropy(wordCount, wordlistSize, paddingDigits = 0) {
-  if (wordCount === 0 || !wordlistSize) return 0;
+  if (!wordlistSize) return 0;
   return Math.floor((wordCount * Math.log2(wordlistSize)) + (paddingDigits * Math.log2(10)));
 }
 

@@ -243,7 +243,7 @@ export default function PasswordGenerator() {
                   id="wordlist-selector"
                   value={wordlistId}
                   onChange={(e) => setWordlistId(e.target.value)}
-                  className="bg-surface-2 text-text-primary rounded-md px-3 py-2 border border-border-subtle"
+                  className="max-w-full bg-surface-2 text-text-primary rounded-md px-3 py-2 border border-border-subtle"
                 >
                   {WORDLIST_OPTIONS.map((option) => (
                     <option key={option.id} value={option.id}>{option.label}</option>

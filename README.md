@@ -73,7 +73,7 @@ Ops Toolbox solves this by being **unconditionally client-side**. There is no co
 | **Air-gap friendly** | No external calls at runtime; runs on a disconnected host with identical behavior. |
 | **Privacy by construction** | No backend, no API, no analytics, no telemetry, no third-party scripts. |
 | **Accessible by default** | `data-theme` theming (Light, Dark, High-Contrast Slate, System), visible focus rings, `prefers-reduced-motion` support. |
-| **Testable architecture** | Pure logic extracted into `src/lib/`; 474 passing tests across 56 files (Vitest + Testing Library). |
+| **Testable architecture** | Pure logic extracted into `src/lib/`, covered by Vitest and Testing Library. |
 | **Code-split per tool** | Each tool is lazy-loaded with `React.lazy()` + `Suspense` — you only load what you open. |
 | **Self-hostable** | A multi-stage Docker image serves the prerendered SPA from nginx; `docker compose up` yields a working instance. |
 
@@ -134,14 +134,15 @@ All 24 tools process data **locally, in the browser** — every tool is air-gap-
 ```bash
 git clone https://github.com/radioastronomyio/ops-toolbox.git
 cd ops-toolbox
-npm install
+npm install --global npm@12.0.2  # Match CI and Docker (Node 22)
+npm ci
 npm run dev          # Dev server at http://localhost:5173
 ```
 
 ### Testing
 
 ```bash
-npm run test         # Single run — 474 tests, 56 files
+npm run test         # Single run
 npm run test:watch   # Watch mode
 ```
 

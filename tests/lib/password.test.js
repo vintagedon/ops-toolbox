@@ -191,6 +191,11 @@ describe('generatePassphrase', () => {
     expect(result).toMatch(/^alpha-alpha-alpha\d{4}$/);
   });
 
+  it('counts padding entropy when generation requests no words', () => {
+    expect(generatePassphrase(0, '-', false, ['alpha'], 5)).toMatch(/^\d{5}$/);
+    expect(calculatePassphraseEntropy(0, 1, 5)).toBe(16);
+  });
+
   it('draws numeric padding from Web Crypto', () => {
     const getRandomValues = vi.spyOn(window.crypto, 'getRandomValues');
     generatePassphrase(3, '-', false, ['alpha'], 2);
