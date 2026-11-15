@@ -1,7 +1,7 @@
 <!--
 ---
 title: "Tool Reference"
-description: "Complete reference for all 24 Ops Toolbox utilities"
+description: "Complete reference for all 25 Ops Toolbox utilities"
 author: "vintagedon"
 date: "2026-03-16"
 version: "1.0"
@@ -32,7 +32,7 @@ Quick lookup for what each tool does, how it works, and what libraries power it.
 
 ## 2. Scope
 
-Covers all 24 tools across 4 categories: Networking, Security, Data, and Developer. For each tool: what it does, processing mode, key library dependencies, and notable implementation details.
+Covers all 25 tools across 4 categories: Networking, Security, Data, and Developer. For each tool: what it does, processing mode, key library dependencies, and notable implementation details.
 
 ---
 
@@ -181,6 +181,16 @@ Users, contributors, and AI coding assistants working in this repository.
 | **Library** | `sql-formatter` |
 | **Mode** | Local |
 | **Description** | Paste SQL to pretty-print with proper indentation. Supports multiple dialects: PostgreSQL, MySQL, T-SQL, SQLite, BigQuery, and more. Configurable indent width and uppercase keywords. |
+
+
+### Text Transformer
+
+| | |
+|---|---|
+| **Route** | `/text-transformer` |
+| **Source** | `src/tools/TextTransformer.jsx` + `src/lib/textTransform.js` |
+| **Mode** | Local |
+| **Description** | Ordered text transformations with a live preview. Collapse blank lines is enabled on load, including invisible Unicode whitespace. Add, repeat, reorder or disable operations; remove blanks, trim, normalize line endings, dedupe, sort by Unicode code point, change case or find and replace literal text. Apply replaces Input and clears operations; Undo Apply restores both (ten snapshots). Restore original returns to the last imported or pasted baseline after confirmation if edits would be lost. Import one UTF-8 file up to 2 MiB; invalid UTF-8 and NUL bytes are rejected. Copy and Download use only the current valid preview. Download preserves a leading file BOM and the final newline; mixed imported line endings produce an LF notice. All work stays in the browser, with no content persisted. |
 
 ---
 

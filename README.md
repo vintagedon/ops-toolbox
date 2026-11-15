@@ -1,7 +1,7 @@
 <!--
 ---
 title: "Ops Toolbox"
-description: "24 client-side utility tools for IT operations and platform engineering — 100% in-browser, air-gap-friendly, self-hostable."
+description: "25 client-side utility tools for IT operations and platform engineering — 100% in-browser, air-gap-friendly, self-hostable."
 author: "VintageDon (https://github.com/vintagedon/)"
 date: "2026-06-25"
 version: "4.0"
@@ -16,7 +16,7 @@ tags:
 <div align="center">
   <img src="assets/logo.svg" width="96" height="96" alt="Ops Toolbox logo" />
   <h1>Ops Toolbox</h1>
-  <p><strong>24 client-side developer utilities for IT operations and platform engineering.</strong></p>
+  <p><strong>25 client-side developer utilities for IT operations and platform engineering.</strong></p>
   <p>Paste your data, get your output, keep your privacy. Everything runs in the browser — no servers, no APIs, no data transmission.</p>
 
   <p>
@@ -69,7 +69,7 @@ Ops Toolbox solves this by being **unconditionally client-side**. There is no co
 
 | Feature | Detail |
 |---------|--------|
-| **24 focused tools** | Networking, security, data, and developer utilities — see the [Tools](#-tools) table. |
+| **25 focused tools** | Networking, security, data, and developer utilities — see the [Tools](#-tools) table. |
 | **Air-gap friendly** | No external calls at runtime; runs on a disconnected host with identical behavior. |
 | **Privacy by construction** | No backend, no API, no analytics, no telemetry, no third-party scripts. |
 | **Accessible by default** | `data-theme` theming (Light, Dark, High-Contrast Slate, System), visible focus rings, `prefers-reduced-motion` support. |
@@ -81,7 +81,7 @@ Ops Toolbox solves this by being **unconditionally client-side**. There is no co
 
 ## 🧰 Tools
 
-All 24 tools process data **locally, in the browser** — every tool is air-gap-capable.
+All 25 tools process data **locally, in the browser** — every tool is air-gap-capable.
 
 ### Networking (2)
 
@@ -101,7 +101,7 @@ All 24 tools process data **locally, in the browser** — every tool is air-gap-
 | File Hash Calculator | Compute MD5, SHA-1, SHA-256, SHA-512 digests for any file | Local |
 | Bcrypt Verifier | Hash strings with bcrypt and verify passwords against stored hashes | Local |
 
-### Data (5)
+### Data (6)
 
 | Tool | Description | Mode |
 |------|-------------|------|
@@ -110,6 +110,7 @@ All 24 tools process data **locally, in the browser** — every tool is air-gap-
 | JSON Diff | Side-by-side structural diff with color-coded changes | Local |
 | CSV to JSON | Convert CSV files/text to JSON with delimiter auto-detection | Local |
 | SQL Formatter | Pretty-print SQL with dialect support (PostgreSQL, MySQL, T-SQL, BigQuery) | Local |
+| Text Transformer | Clean pasted text with ordered blank-line, trim, dedupe, sort, case and literal replace operations | Local |
 
 ### Developer (11)
 
@@ -203,7 +204,7 @@ Ops Toolbox is a React 18 SPA with code-split tool routes. Pure computation live
     ┌─────────┼─────────┐
     │         │         │
 ┌───▼───┐ ┌──▼──┐ ┌───▼───┐
-│Tool 1 │ │ ... │ │Tool 24│  React.lazy() per tool
+│Tool 1 │ │ ... │ │Tool 25│  React.lazy() per tool
 └───┬───┘ └──┬──┘ └───┬───┘
     │        │        │
     └────────┼────────┘
@@ -222,7 +223,7 @@ Ops Toolbox is a React 18 SPA with code-split tool routes. Pure computation live
 | Tool Registry | `src/lib/toolRegistry.js`, data-only module, no React imports | Single source of truth for routing, the directory grid, badges, and search |
 | Code Splitting | `React.lazy()` + `Suspense` per tool route | Only load the tool the user navigates to |
 | Logic Extraction | Pure functions in `src/lib/`, components in `src/tools/` | Testable without rendering; lib tests are fast |
-| Shared Primitives | `useClipboard`, `useDebouncedValue`, `CopyButton`, `ErrorBanner` | Eliminate hand-rolled clipboard/debounce across 24 tools |
+| Shared Primitives | `useClipboard`, `useDebouncedValue`, `CopyButton`, `ErrorBanner` | Eliminate hand-rolled clipboard/debounce across 25 tools |
 | Rejection Sampling | `src/lib/password.js` | Eliminate modulo bias in cryptographic random generation |
 | Semantic Design Tokens | HSL CSS custom properties; raw Tailwind palette disabled | Consistent theming across Light / Dark / High-Contrast Slate / System |
 | Per-Route Prerender | `scripts/prerender.mjs` | Route-specific title + social cards for SEO and link unfurls, no server needed |

@@ -14,7 +14,7 @@ tags:
 
 # App Documentation
 
-Reference documentation for Ops Toolbox utilities. The tool reference covers all 24 tools in a single document; individual articles exist for tools with extended documentation needs.
+Reference documentation for Ops Toolbox utilities. The tool reference covers all 25 tools in a single document; individual articles exist for tools with extended documentation needs.
 
 ---
 
@@ -22,7 +22,7 @@ Reference documentation for Ops Toolbox utilities. The tool reference covers all
 
 ```
 apps/
-├── tool-reference.md      # Complete reference for all 24 tools
+├── tool-reference.md      # Complete reference for all 25 tools
 ├── mermaid-renderer.md    # Detailed Mermaid Renderer guide
 └── README.md              # This file
 ```
@@ -33,7 +33,7 @@ apps/
 
 | Article | Coverage | Status |
 |---------|----------|--------|
-| [tool-reference.md](tool-reference.md) | All 24 tools — routes, sources, libraries, descriptions | Active |
+| [tool-reference.md](tool-reference.md) | All 25 tools — routes, sources, libraries, descriptions | Active |
 | [mermaid-renderer.md](mermaid-renderer.md) | Mermaid Renderer — ELK layout, export, data sovereignty | Active |
 
 ---

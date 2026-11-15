@@ -60,7 +60,7 @@ were removed and repository source stayed intact. All exited 1:
 Clean committed-checkout parity receipt follows at the next checkpoint, before
 starting gate 1.2.2 implementation. Commits remain local.
 
-Gate 1.2.1 commit: `dc38bfe674` (full SHA available via `git rev-parse dc38bfe`).
+Gate 1.2.1 commit: `dc38bfe7f8abb8bb84cdbdcbc910f916315f9fba`.
 A detached, clean `/tmp/opstoolbox12-gate1` checkout of that commit ran
 `npx -y -p node@22 -p npm@12.0.2 -- sh -c 'node -v && npm -v && npm ci --no-audit --no-fund && npm run test && npm run build'`:
 Node `v22.23.5`, npm `12.0.2`; install passed; 65 files / 611 tests passed
@@ -103,3 +103,47 @@ black/white classes or em dashes; `git diff --check` passes.
 
 Gate-2 committed-checkout parity receipt follows before gate-3 implementation.
 No out-of-scope changes proposed at this checkpoint. No operator questions.
+
+Gate 1.2.2 commit: `ef02dd771bc54e4d7dd51cd4868671ad07966914`.
+Clean detached `/tmp/opstoolbox12-gate2` checkout: the same pinned command
+prints Node `v22.23.5` / npm `12.0.2`; `npm ci` passes, 66 files / 621 tests
+pass in 10.47 s, build passes (Vite 1.00 s), 27 prerendered routes and sitemap
+entries. The gate-1 abbreviated SHA above was corrected to its full actual SHA.
+
+## Gate 1.2.3
+
+Counts changed only at the authorized locations, with only the numeric value
+changed. README Data heading is 6, matching six registry Data entries and six
+table rows. New inventory rows name `textTransform.js` and `TextTransformer.jsx`.
+Section 6 of the tool reference now ends with Text Transformer's Route, both
+Source files, Mode and behavioral reference. No dependencies/configs changed.
+
+Remaining `24` hits from the exact requested seven-file grep (five total):
+
+- README.md:43: hero screenshot alt text, explicitly deferred to spec 1.1.
+- AGENTS.md:108: June 24 launch-UX archive filename, a date.
+- AGENTS.md:109: June 24 OSS-readiness archive filename, a date.
+- AGENTS.md:110: June 24 passphrase-depth archive filename, a date.
+- AGENTS.md:112: July 24 wiki-explainers archive filename, a date.
+
+`grep -cP '\x{2014}'` reports 0 for all four new JS/JSX source/test files and
+for the isolated new tool-reference entry. Raw black/white class scan returns
+no matches. An exact baseline comparison confirms AGENTS.md differs only by
+24-to-25 at original lines 10, 45, 146. `git diff --check` passes.
+
+Browser prequalification against gate-2 built output, fresh Chromium context,
+Python Playwright 1.64.0 with the shared read-only browser cache (no downloads):
+
+- Home Data filter exposes Text Transformer; SVG is `lucide-list-filter`, not the Network fallback.
+- Filling Input with F2 yields `a\n\nb` without changing operations; real clipboard contains exactly that text.
+- BOM + F4 import, Apply, Undo Apply and confirmed Restore original pass. Download is named `transformed.txt` and its bytes equal BOM + `a\r\n\r\nb\r\n`. F12 file import shows the mixed-ending notice and outputs LF.
+- Keyboard Tab/arrows/Enter/Space add Prefix, move it up, disable it, reach Copy and copy the expected current preview.
+- At 320 px, under Light, Dark and High-Contrast Slate selected through Settings, document scroll width never exceeds the viewport. Console/page errors: 0. Outside-server requests are aborted and logged; log: `[]` (zero). Full run 6.76 s.
+- Desktop and mobile captures were visually inspected on ml01a; panes fit their content area, stack on mobile and show full results. Scratch captures are not relied on as durable evidence.
+
+The first browser attempt hit a leftover timing-preview child and returned 404;
+that task-owned PID was identified by its deleted gate-1 cwd and stopped. Two
+keyboard harness attempts handled native select focus incorrectly; correcting
+the harness to use arrows then Tab passed without product or fixture changes.
+No spec fixture failed as written. All preview processes will be stopped before
+removing worktrees. Gate-3 clean committed-checkout qualification follows.

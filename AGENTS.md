@@ -7,7 +7,7 @@ Entry point for AI coding agents working on this repository.
 **Domain:** IT Operations / Web Utilities
 **Repository:** https://github.com/vintagedon/ops-toolbox
 **Live:** https://opstoolbox.dev/
-**Purpose:** A collection of 24 client-side utility web tools for IT operations and platform engineering. All processing happens in the browser; no backends, no data transmission. Hosted on Azure Static Web Apps.
+**Purpose:** A collection of 25 client-side utility web tools for IT operations and platform engineering. All processing happens in the browser; no backends, no data transmission. Hosted on Azure Static Web Apps.
 
 **Stack:** React 18, Vite 8, React Router v7, Tailwind CSS v3, Vitest, theming via `data-theme` (Light, Dark, High-Contrast Slate, System)
 
@@ -42,7 +42,7 @@ Single-page application with React Router v7. Tools are lazy-loaded via `React.l
 ## Documentation
 
 - **`docs/architecture.md`** — SPA architecture overview
-- **`docs/apps/tool-reference.md`** — Complete reference for all 24 tools
+- **`docs/apps/tool-reference.md`** — Complete reference for all 25 tools
 - **`docs/design/contrast-standard.md`** — WCAG AA contrast rule every palette is audited against
 - **`docs/design/typography-roles.md`** — UI/mono type roles, the type scale, and the micro-label convention
 - **`docs/documentation-standards/`** — Template library for READMEs, KB articles, script headers
@@ -143,7 +143,7 @@ ops-toolbox/
 │   ├── lib/                        # Pure utility functions (no React)
 │   ├── pages/                      # Non-tool pages (About)
 │   ├── styles/                     # Design tokens + accessibility baseline CSS
-│   └── tools/                      # One React component per tool (24 tools)
+│   └── tools/                      # One React component per tool (25 tools)
 ├── staging/                        # Staged work (contents gitignored)
 ├── tests/                          # Vitest test suites
 ├── work-logs/                      # Repo-local development history

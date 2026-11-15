@@ -25,7 +25,7 @@ docs/
 ├── architecture.md                 # SPA architecture overview
 ├── specs/                          # Weekend release specifications (draft)
 ├── apps/                           # Tool documentation
-│   ├── tool-reference.md           # Complete reference for all 24 tools
+│   ├── tool-reference.md           # Complete reference for all 25 tools
 │   ├── mermaid-renderer.md         # Detailed Mermaid Renderer guide
 │   └── README.md
 ├── documentation-standards/        # Template library and guidelines
@@ -56,7 +56,7 @@ docs/
 | Document | Description |
 |----------|-------------|
 | [Architecture](architecture.md) | SPA structure, routing, registry, testing strategy |
-| [Tool Reference](apps/tool-reference.md) | All 24 tools: routes, sources, libraries, descriptions |
+| [Tool Reference](apps/tool-reference.md) | All 25 tools: routes, sources, libraries, descriptions |
 | [Mermaid Renderer](apps/mermaid-renderer.md) | Detailed guide for the diagram renderer |
 
 ---
