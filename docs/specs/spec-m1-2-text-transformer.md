@@ -3,7 +3,7 @@ title: "1.2 Text Transformer"
 description: "Ordered local text transformations with preview, reversible application, and a zero-click blank-line default"
 date: "2026-11-15"
 version: "0.3"
-status: "active"
+status: "blocked"
 tags:
   - type: specification
   - domain: data
@@ -237,3 +237,19 @@ Frozen: the line model, the blank set, every operation's semantics, the default 
 4. 1.2.4 closeout
 
 No batch renaming, multi-file editing, automatic saving or online processing in this release.
+
+
+## Execution status amendment (2026-11-15)
+
+Issue #12, local branch `task/1-2-text-transformer`: gates 1.2.1 through 1.2.3
+are implemented and qualified. Closeout stopped under the invalidated-assumption
+rule after the broader repository count audit found `src/pages/About.jsx:21`
+hard-codes `{24}`. That path is outside Modify, while Objective requires every
+tool-count claim to say 25 except the named visual assets and alt text. The
+specified seven-file count grep does not inspect About. No fixture, semantics,
+registry field or scope has been changed to hide this conflict.
+
+Proposed amendment requiring operator authorization: add `src/pages/About.jsx`
+to Modify for the sole `{24}` to `{25}` count correction. The file remains
+unchanged. See `work-logs/worklog-2026-11-15-text-transformer.md` for evidence,
+local gate commits and the held proposed PR body. No publication or acceptance.
