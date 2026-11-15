@@ -18,8 +18,8 @@ are proposed defaults for review. Spec numbers identify work, not a product vers
 
 | Order | Specification | Result | State |
 |---|---|---|---|
-| 1 | [1.0 Dependency maintenance](spec-m1-0-dependency-maintenance.md) | Qualify major upgrades left after compatible closeout fixes | v0.3, reviewed; strict-mode proof corrected |
-| 2 | [1.2 Text Transformer](spec-m1-2-text-transformer.md) | Ordered text operations with original/input/preview and safe file handling | v0.2, reviewed |
+| 1 | [1.0 Dependency maintenance](spec-m1-0-dependency-maintenance.md) | Qualify major upgrades left after compatible closeout fixes | v0.4, reviewed; Node 22 parity via npx (no Docker for the run account) |
+| 2 | [1.2 Text Transformer](spec-m1-2-text-transformer.md) | Ordered text operations with original/input/preview and safe file handling | v0.3, reviewed; Node 22 parity via npx |
 | 3 | [1.1 Sentinel workspace](spec-m1-1-sentinel-workspace.md) | Persistent navigation, useful front page, coherent themes and capability filters | v0.3 draft; waits on Sentinel spec 09 (Ember and Sea) |
 | 4 | [1.3 Cloud subnet planner](spec-m1-3-cloud-subnet-planner.md) | Local provider-aware IPv4 planning, visual map and reusable exports | v0.1 draft |
 | 5 | [1.4 Release editions](spec-m1-4-release-editions.md) | One codebase, full and air-gapped artifacts, first connected DNS tool | v0.2 draft; editions and DNS Lookup decided; needs hardening |

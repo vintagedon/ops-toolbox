@@ -2,7 +2,7 @@
 title: "1.0 Dependency maintenance"
 description: "Qualify the remaining major dependency upgrades before feature work, and put residual advisories and workflow warnings in front of the operator"
 date: "2026-11-15"
-version: "0.3"
+version: "0.4"
 status: "active"
 tags:
   - type: specification
@@ -25,7 +25,7 @@ behavior checks, but prove the strict setting separately with a failing mutation
 
 ## Objective
 
-When this spec closes, every dependency advisory that has a compatible upstream repair is repaired, and every one that does not sits in the review document with its evidence and a yes/no question for the operator. All 24 tools and their routes behave as before. Clean installs pass on CI's Node 22 / npm 12.0.2 and in the Docker image. The three CI maintenance warnings are inventoried with a proposed workflow diff for the operator, and the workflow itself is unchanged.
+When this spec closes, every dependency advisory that has a compatible upstream repair is repaired, and every one that does not sits in the review document with its evidence and a yes/no question for the operator. All 24 tools and their routes behave as before. Clean installs pass on CI's Node 22 / npm 12.0.2; verifying the Docker image is an operator item (D1), because the run account cannot use Docker. The three CI maintenance warnings are inventoried with a proposed workflow diff for the operator, and the workflow itself is unchanged.
 
 ## Why this exists
 
@@ -53,7 +53,7 @@ Prior findings here were observed at `main` = `75ba911`. Verify each before acti
 |---|---|
 | Host | ml01a, primary checkout `/opt/agents/repos/ops-toolbox`. Clean tree on `main` is the precondition. |
 | Attended | No. The run does not pause. The operator reviews the local branch and the review document before push. |
-| Toolchain | ml01a's default is Node 24 / npm 11, which is not CI parity. Every install and test claim is proven in a `node:22-alpine` container with npm 12.0.2, from a clean checkout of the gate commit. |
+| Toolchain | ml01a's default is Node 24 / npm 11, which is not CI parity, and the run account has no Docker access. Every install and test claim is proven with Node 22 and npm 12.0.2 through `npx -y -p node@22 -p npm@12.0.2 -- <command>`, run in a clean checkout of the gate commit (a scratch worktree), with `node -v` and `npm -v` recorded. |
 | Browser checks | Python Playwright from `/opt/agents/venv`, Chromium only, against `npx vite preview` of the production build. The dev server stays local and is never served through the shared nginx site. |
 | Network | Package registries for install and audit. No other external calls. |
 
@@ -100,7 +100,7 @@ Upgrade Vite and `@vitejs/plugin-react` together, and Vitest if the new Vite req
 **Validation:**
 
 - [ ] `npm ls vite esbuild --all` shows one patched Vite and no esbuild at or below 0.24.2.
-- [ ] Container (Node 22, npm 12.0.2): `npm ci`, `npm run test` and `npm run build` pass; the test count equals the pre-upgrade count (550 at `75ba911`) or every difference is explained in the worklog.
+- [ ] Under the Node 22 / npm 12.0.2 toolchain, in a clean checkout of the gate commit: `npm ci`, `npm run test` and `npm run build` pass; the test count equals the pre-upgrade count (550 at `75ba911`) or every difference is explained in the worklog.
 - [ ] The build log contains none of the deprecation warnings recorded at gate 1.0.1.
 
 ### Gate 1.0.3: Router
@@ -111,7 +111,7 @@ Upgrade React Router to the patched major. Keep `BrowserRouter`, lazy routes and
 
 - [ ] `npm ls react-router react-router-dom` shows only patched versions.
 - [ ] Playwright against the built preview: a direct load of every registered tool path and `/about` renders that page's `<h1>`; `/no-such-tool` renders the not-found view; browser back and forward between two tools restores each.
-- [ ] Full test suite passes in the container.
+- [ ] Full test suite passes under the Node 22 / npm 12.0.2 toolchain.
 
 ### Gate 1.0.4: Mermaid stack
 
@@ -133,17 +133,18 @@ Upgrade `mermaid` and `@mermaid-js/layout-elk` together. Keep `securityLevel: 's
 
 ### Gate 1.0.5: Release proof and review surface
 
-Prove the whole: fresh audit, container install, Docker image, every route, no unexpected external requests. Update the stack references in Modify. Complete the review document.
+Prove the whole: fresh audit, clean install under the Node 22 / npm 12.0.2 toolchain, every route, no unexpected external requests. Update the stack references in Modify. Complete the review document.
 
 The review document carries one entry per item, each with an ID, a one-line statement, evidence (command output, advisory ID, file and line), and a closed question:
 
 - **R-items**, one per residual advisory: package, severity, advisory, why no compatible repair exists, applicability evidence. Question: *accept this residual until upstream repairs it?*
+- **D1**, the Docker image: whether `Dockerfile` changed, the diff if it did, and that the image was not built on ml01a. Question: *verify the image elsewhere before the next release?*
 - **W1 to W3**, one per CI warning: current action and version, declared inputs of the resolved action, what removing or changing each input would do to production versus preview deployments, and the proposed diff. Question: *approve this diff as a separate workflow change?*
 
 **Validation:**
 
 - [ ] Fresh `npm audit --json`: zero critical and zero high, and every remaining entry has an R-item. Zero entries is the target; any remainder is listed, never waived silently.
-- [ ] `docker build` succeeds; the container serves home, one tool and a deep link with HTTP 200 and the expected `<title>`.
+- [ ] The Docker image is not built here: the run account has no Docker access on ml01a. The review document carries item D1 stating whether `Dockerfile` changed (with the diff if it did) and asking the operator whether to verify the image elsewhere before release. It is recorded as UNAVAILABLE, not as passed.
 - [ ] Playwright, fresh context with every request outside the local server aborted and logged: every registered route loads, and the aborted-request log is empty.
 - [ ] `grep -nE 'Vite 5|React Router v6' AGENTS.md README.md docs/architecture.md docs/documentation-standards/tagging-strategy.md` returns nothing.
 - [ ] Each review entry has ID, statement, evidence and a yes/no question; W-entries contain a diff and no workflow file changed (`git diff main --stat -- .github/` is empty).
@@ -156,7 +157,7 @@ Follow "Executing a Work Spec" in `AGENTS.md`. Branch `task/1-0-dependency-maint
 
 - [ ] `git log main..HEAD` shows one commit per gate (1.0.1 to 1.0.5) plus closeout, and no reverted gate is left unexplained.
 - [ ] `git merge-base main HEAD` equals `main` at startup; nothing was pushed (`git ls-remote origin task/1-0-dependency-maintenance` is empty).
-- [ ] The worklog records before and after audits, target versions, container `node -v`/`npm -v`, test counts per gate, and the PR body, and is sealed.
+- [ ] The worklog records before and after audits, target versions, toolchain `node -v`/`npm -v`, test counts per gate, and the PR body, and is sealed.
 
 ## Constraints
 

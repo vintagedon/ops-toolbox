@@ -2,7 +2,7 @@
 title: "1.2 Text Transformer"
 description: "Ordered local text transformations with preview, reversible application, and a zero-click blank-line default"
 date: "2026-11-15"
-version: "0.2"
+version: "0.3"
 status: "active"
 tags:
   - type: specification
@@ -36,7 +36,7 @@ Prior findings here (paths, line numbers, counts) were observed at `main` = `75b
 |---|---|
 | Host | ml01a, primary checkout `/opt/agents/repos/ops-toolbox`. Clean tree on `main` is the precondition. |
 | Attended | No. The run does not pause. The operator reviews the local branch before push. |
-| Toolchain | Repository `npm` scripts. CI parity (Node 22, npm 12.0.2) is proven in a `node:22-alpine` container, as in the Dockerfile build stage; ml01a's default Node 24 / npm 11 is not parity. |
+| Toolchain | Repository `npm` scripts. CI parity (Node 22, npm 12.0.2) is proven through `npx -y -p node@22 -p npm@12.0.2 -- <command>` in a clean checkout of the gate commit; ml01a's default Node 24 / npm 11 is not parity, and the run account has no Docker access. |
 | Browser checks | Python Playwright from `/opt/agents/venv`, Chromium only, against `npm run build` output served by `npx vite preview`. |
 | Existing code | None of the new files exist. |
 
@@ -196,7 +196,7 @@ Update every count in Modify to 25 and add the inventory rows and tool-reference
 - [ ] `grep -rnE '\b24\b' README.md AGENTS.md docs/README.md docs/apps/README.md docs/apps/tool-reference.md scripts/generate-meta.mjs tests/lib/toolRegistry.test.js` returns only the README line-43 alt text and lines unrelated to tool count; each remaining hit is listed in the worklog with its reason.
 - [ ] README's Data heading count equals the number of `category: 'Data'` registry entries (6).
 - [ ] `grep -cP '\x{2014}'` on the new files and the new tool-reference entry returns 0.
-- [ ] In a `node:22-alpine` container with npm 12.0.2, a clean checkout of the gate commit passes `npm ci`, `npm run test` and `npm run build`; `node -v` and `npm -v` output is in the worklog.
+- [ ] Under Node 22 and npm 12.0.2 through the npx toolchain, a clean checkout of the gate commit passes `npm ci`, `npm run test` and `npm run build`; `node -v` and `npm -v` output is in the worklog.
 - [ ] `dist/text-transformer/index.html` exists, `dist/sitemap.xml` holds 27 `<loc>` entries including `https://opstoolbox.dev/text-transformer`, and `dist/llms.txt` contains the frozen description verbatim.
 - [ ] Playwright, fresh context, every request outside the local preview server aborted and logged: home shows a Text Transformer card under Data whose icon is not the Network fallback; on `/text-transformer`, filling Input with the F2 input yields `a\n\nb` in Preview with no other action; file import, Apply, Undo Apply, Restore original, Copy and Download all work; the aborted-request log is empty.
 - [ ] Playwright at 320 px: `document.documentElement.scrollWidth <= window.innerWidth`. Under Light, Dark and High-Contrast Slate: no console errors. Keyboard only: add, reorder, disable an operation, and reach Copy.
@@ -210,7 +210,7 @@ Follow "Executing a Work Spec" in `AGENTS.md`. Branch `task/1-2-text-transformer
 - [ ] `git log main..HEAD` shows only this spec's commits: one per gate (1.2.1, 1.2.2, 1.2.3) plus closeout.
 - [ ] `git merge-base main HEAD` equals `main` at startup.
 - [ ] Nothing was pushed: `git ls-remote origin task/1-2-text-transformer` returns nothing.
-- [ ] The worklog records base commit, gate SHAs, mutation results, timing and worker decision, container versions, the remaining-`24` list and the PR body, and is sealed.
+- [ ] The worklog records base commit, gate SHAs, mutation results, timing and worker decision, toolchain versions, the remaining-`24` list and the PR body, and is sealed.
 
 ## Constraints
 
@@ -231,7 +231,7 @@ Frozen: the line model, the blank set, every operation's semantics, the default 
 
 1. 1.2.1 pure pipeline (everything depends on its semantics)
 2. 1.2.2 workspace
-3. 1.2.3 counts, docs, qualification (container and browser results are final only after 1.2.2)
+3. 1.2.3 counts, docs, qualification (toolchain and browser results are final only after 1.2.2)
 4. 1.2.4 closeout
 
 No batch renaming, multi-file editing, automatic saving or online processing in this release.
