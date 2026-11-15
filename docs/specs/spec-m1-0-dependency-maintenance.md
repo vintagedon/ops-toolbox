@@ -23,6 +23,8 @@ fixtures pass in loose mode on the locked Mermaid version: the app discards
 `bindFunctions`, and Mermaid sanitizes the HTML label in both modes. Keep those
 behavior checks, but prove the strict setting separately with a failing mutation.
 
+v0.4 (Claude, 2026-11-15, dispatch preflight) replaces the `node:22-alpine` container with the npx Node 22 / npm 12.0.2 toolchain, because the run account has no Docker access, and turns the image build into operator item D1 (SD-435). Scope is unchanged.
+
 ## Objective
 
 When this spec closes, every dependency advisory that has a compatible upstream repair is repaired, and every one that does not sits in the review document with its evidence and a yes/no question for the operator. All 24 tools and their routes behave as before. Clean installs pass on CI's Node 22 / npm 12.0.2; verifying the Docker image is an operator item (D1), because the run account cannot use Docker. The three CI maintenance warnings are inventoried with a proposed workflow diff for the operator, and the workflow itself is unchanged.

@@ -18,6 +18,8 @@ related_documents:
 
 v0.1 (GPT, 2026-11-14) set the interaction model. v0.2 (Claude, 2026-11-15, triad review) adds the blank-character definition, verified fixtures, the zero-click default, frozen registry fields, scope and closeout. The interaction model is unchanged.
 
+v0.3 (Claude, 2026-11-15, dispatch preflight) replaces the `node:22-alpine` container with the npx Node 22 / npm 12.0.2 toolchain, because the run account has no Docker access (SD-435). Scope is unchanged.
+
 ## Objective
 
 When this spec closes, `/text-transformer` is tool 25: one local, offline-capable page for pasted text or one UTF-8 text file. An ordered operation strip sits above input and preview panes. The page opens with one operation, **Collapse blank lines**, already enabled, so pasting copied AI output and pressing Copy yields clean text with no other click. "Blank" covers the invisible characters that AI output carries (non-breaking spaces, zero-width characters, byte-order marks), not just spaces and tabs. The pure pipeline in `src/lib/textTransform.js` matches the fixture table below exactly. Every tool-count claim in the repository says 25, except the hero screenshot, its alt text and the social card, which spec 1.1 redoes.
