@@ -2,6 +2,7 @@
 title: "1.1 Sentinel workspace"
 description: "A scalable workspace shell, useful home page, and coherent accessible themes"
 date: "2026-11-14"
+version: "0.3"
 status: "draft"
 tags:
   - type: specification
@@ -31,7 +32,7 @@ Use the Sentinel baseline at the merge commit of Sentinel spec 09 (Ember and Sea
 palettes) on `vintagedon/sentinel-website-framework` `main`, and record its full
 SHA at dispatch. Its parent baseline is `a5e64fd4ab61a16fbacf414dd9a2740d8bddca2a`
 (the merge of PR #6 on 2026-11-10). This spec does not dispatch until spec 09
-merges. Gate 1 lists other commits merged after spec 09 without adopting them.
+merges. At dispatch, record any other Sentinel commits merged after spec 09; do not adopt them.
 Read its design contract, implementation guide and shared tokens; carry attribution
 and license with copied material. Do not import the unmerged schema explorer or
 home widget grid. Keep React/Vite; use local React adapters where needed.

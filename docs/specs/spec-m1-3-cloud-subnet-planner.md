@@ -2,6 +2,7 @@
 title: "1.3 Cloud subnet planner"
 description: "Local IPv4 planning with provider rules, a visual address map and exports"
 date: "2026-11-14"
+version: "0.1"
 status: "draft"
 tags:
   - type: specification

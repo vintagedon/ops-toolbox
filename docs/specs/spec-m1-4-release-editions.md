@@ -2,6 +2,7 @@
 title: "1.4 Full and air-gapped releases"
 description: "One source tree with explicit connected capabilities and offline distributions"
 date: "2026-11-14"
+version: "0.2"
 status: "draft"
 tags:
   - type: specification

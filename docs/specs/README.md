@@ -22,7 +22,7 @@ are proposed defaults for review. Spec numbers identify work, not a product vers
 | 2 | [1.2 Text Transformer](spec-m1-2-text-transformer.md) | Ordered text operations with original/input/preview and safe file handling | v0.2, reviewed |
 | 3 | [1.1 Sentinel workspace](spec-m1-1-sentinel-workspace.md) | Persistent navigation, useful front page, coherent themes and capability filters | v0.3 draft; waits on Sentinel spec 09 (Ember and Sea) |
 | 4 | [1.3 Cloud subnet planner](spec-m1-3-cloud-subnet-planner.md) | Local provider-aware IPv4 planning, visual map and reusable exports | v0.1 draft |
-| 5 | [1.4 Release editions](spec-m1-4-release-editions.md) | One codebase, full and air-gapped artifacts, first connected DNS tool | v0.1 draft; editions and DNS Lookup decided; needs hardening |
+| 5 | [1.4 Release editions](spec-m1-4-release-editions.md) | One codebase, full and air-gapped artifacts, first connected DNS tool | v0.2 draft; editions and DNS Lookup decided; needs hardening |
 
 Triad review (Claude, 2026-11-15) hardened 1.0 and 1.2 for dispatch after GPT
 review and carried its findings into 1.1. The November 4 central blank line

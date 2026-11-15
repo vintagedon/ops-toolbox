@@ -3,7 +3,7 @@ title: "1.2 Text Transformer"
 description: "Ordered local text transformations with preview, reversible application, and a zero-click blank-line default"
 date: "2026-11-15"
 version: "0.2"
-status: "review-ready"
+status: "active"
 tags:
   - type: specification
   - domain: data
@@ -145,10 +145,10 @@ Build `src/lib/textTransform.js`: the line model, the operation descriptors abov
 - [ ] A disabled operation is inert: the F2 input with Collapse disabled returns the input unchanged. Two Prefix instances apply twice.
 - [ ] Dedupe, sort (both directions), case, prefix/suffix and find/replace each have tests, including empty find rejected and case-insensitive replace preserving unmatched spans.
 - [ ] Mutations, each in a scratch copy, reverted afterwards, failing tests recorded in the worklog:
-  - M1: blank test becomes `line.trim() === ''`. F2, F7 and F11 fail.
-  - M2: splitter splits on `\n` only. F4, F5 and F12 fail.
-  - M3: Collapse keeps the first blank line's original text instead of `""`. F2 and F11 fail.
-  - M4: parser drops the final terminator before splitting. F4, F10 and F12 fail.
+  - M1: blank test becomes `line.trim() === ''`. At least F2, F7 and F11 fail.
+  - M2: splitter splits on `\n` only. At least F4, F5 and F12 fail.
+  - M3: Collapse keeps the first blank line's original text instead of `""`. At least F2 and F11 fail.
+  - M4: parser drops the final terminator before splitting. At least F4, F10 and F12 fail; F3 may also fail, depending on how the terminal-newline flag is lost.
 - [ ] The module imports nothing from React and carries a JSDoc `@file` header.
 
 ### Gate 1.2.2: Workspace

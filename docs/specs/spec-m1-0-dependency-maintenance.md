@@ -3,14 +3,13 @@ title: "1.0 Dependency maintenance"
 description: "Qualify the remaining major dependency upgrades before feature work, and put residual advisories and workflow warnings in front of the operator"
 date: "2026-11-15"
 version: "0.3"
-status: "review-ready"
+status: "active"
 tags:
   - type: specification
   - domain: security
 related_documents:
   - "[Weekend specifications index](README.md)"
   - "[AGENTS.md: Executing a Work Spec](../../AGENTS.md)"
-  - "[Main closeout worklog](/opt/agents/repos/work-logs/2026-11-14-opstoolbox-worklog-00-main-closeout.md)"
 ---
 
 # 1.0 Dependency maintenance
