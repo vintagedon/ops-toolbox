@@ -3,7 +3,7 @@ title: "1.0 Dependency maintenance"
 description: "Qualify the remaining major dependency upgrades before feature work, and put residual advisories and workflow warnings in front of the operator"
 date: "2026-11-15"
 version: "0.4"
-status: "active"
+status: "under-review"
 tags:
   - type: specification
   - domain: security
@@ -183,3 +183,24 @@ Frozen: React 18, Tailwind 3, no workflow edits, no forced overrides, gate order
 - [Production run 43672134033](https://github.com/vintagedon/ops-toolbox/actions/runs/43672134033)
 
 Recheck all of these and the full live audit at execution.
+
+
+## Execution record — 2026-11-15
+
+Authorized input: v0.4 at `73bd13fb1e03a44983a6d30ff287adaef2aa1e15`,
+SHA-256 `6deecab37389057a0cdd4015d99bf85b23924697514731d2ae51ed1b61f1799c`.
+Issue #11; local branch `task/1-0-dependency-maintenance`. Upgrade gates and local
+release proof are recorded in
+[the sealed worklog](../../work-logs/worklog-2026-11-15-dependency-maintenance.md).
+[The review surface](reviews/review-m1-0-dependency-maintenance.md) carries the
+operator decisions. This status is a review handoff, not acceptance or publication.
+
+Dispatch amendments and execution limits: browser proof uses scratch-installed
+Node Playwright **1.64.1** with existing Chromium revision **1248**, replacing the
+Python Playwright environment named above. Network remains package registries
+only (plus local preview traffic), so no `git ls-remote`, live GitHub CI fetch or
+resolved upstream action declaration inspection was performed. W1–W3 distinguish
+prior spec-recorded warnings from verified local workflow content; full upstream
+declaration validation remains **UNAVAILABLE**, not passed. Docker D1 remains
+**UNAVAILABLE** as required. No push, PR, workflow, central registry or archive
+mutation occurred. These limitations are recorded for review, not waived.

@@ -21,7 +21,7 @@ tags:
 
   <p>
     <a href="https://react.dev"><img src="https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=white" alt="React 18"></a>
-    <a href="https://vitejs.dev"><img src="https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white" alt="Vite 5"></a>
+    <a href="https://vitejs.dev"><img src="https://img.shields.io/badge/Vite-8-646CFF?logo=vite&logoColor=white" alt="Vite 8"></a>
     <a href="https://tailwindcss.com"><img src="https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?logo=tailwindcss&logoColor=white" alt="Tailwind CSS 3"></a>
     <a href="https://vitest.dev"><img src="https://img.shields.io/badge/Vitest-4-6E9F18?logo=vitest&logoColor=white" alt="Vitest 4"></a>
     <img src="https://img.shields.io/badge/Processing-100%25_Client--Side-3d8f8f" alt="100% Client-Side">
@@ -189,7 +189,7 @@ Ops Toolbox is a React 18 SPA with code-split tool routes. Pure computation live
                     └──────┬──────┘
                            │
                     ┌──────▼──────┐
-                    │   App.jsx   │  React Router v6
+                    │   App.jsx   │  React Router v7
                     │  (router)   │  lazy-loaded routes
                     └──────┬──────┘
                            │

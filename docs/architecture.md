@@ -51,7 +51,7 @@ Contributors, maintainers, and AI coding assistants working on this repository. 
 ### Entry Flow
 
 ```
-index.html → src/main.jsx → src/App.jsx → React Router v6
+index.html → src/main.jsx → src/App.jsx → React Router v7
 ```
 
 - **`main.jsx`** — Mounts `<App />` into the DOM with `StrictMode` and `BrowserRouter`
@@ -230,7 +230,7 @@ Both serving tiers are configured so discoverability files and the social card a
 |----------|-------------|
 | [Tool Registry](../src/lib/toolRegistry.js) | Canonical tool metadata |
 | [Tool Reference](apps/tool-reference.md) | Per-tool documentation |
-| [React Router v6](https://reactrouter.com/) | Client-side routing |
+| [React Router v7](https://reactrouter.com/) | Client-side routing |
 | [Vitest](https://vitest.dev/) | Test framework |
 | [Tailwind CSS v3](https://v3.tailwindcss.com/) | Utility-first CSS |
 
