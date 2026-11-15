@@ -21,6 +21,7 @@ const toolComponents = {
   'jwt-decoder': lazy(() => import('./tools/JwtDecoder')),
   'password-generator': lazy(() => import('./tools/PasswordGenerator')),
   'json-yaml': lazy(() => import('./tools/JsonYamlConverter')),
+  'text-transformer': lazy(() => import('./tools/TextTransformer')),
   'base64': lazy(() => import('./tools/Base64Codec')),
   'mermaid-renderer': lazy(() => import('./tools/mermaid-renderer/MermaidRenderer')),
   'cidr-expander': lazy(() => import('./tools/CidrExpander')),

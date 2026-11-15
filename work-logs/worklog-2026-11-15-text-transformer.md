@@ -59,3 +59,47 @@ were removed and repository source stayed intact. All exited 1:
 
 Clean committed-checkout parity receipt follows at the next checkpoint, before
 starting gate 1.2.2 implementation. Commits remain local.
+
+Gate 1.2.1 commit: `dc38bfe674` (full SHA available via `git rev-parse dc38bfe`).
+A detached, clean `/tmp/opstoolbox12-gate1` checkout of that commit ran
+`npx -y -p node@22 -p npm@12.0.2 -- sh -c 'node -v && npm -v && npm ci --no-audit --no-fund && npm run test && npm run build'`:
+Node `v22.23.5`, npm `12.0.2`; install passed; 65 files / 611 tests passed
+in 6.34 s; build passed (Vite 1.06 s), 26 routes and sitemap entries.
+Existing large-chunk warnings were reported; no dependency or config changes.
+
+## Gate 1.2.2
+
+Data decisions: snapshots retain exact source, BOM and operation instances;
+Apply clears the list; Undo restores it, capped at ten. An accepted import or
+paste sets the baseline; typing leaves it intact. Restore confirms before
+replacing changed Input, retains the current operation list and clears undo.
+UTF-8 decoding is fatal, explicitly preserves BOM during decode, then strips
+exactly one leading BOM for restoration on download. Invalid files leave the
+prior data, baseline, operations and undo untouched.
+
+Architecture: `TextTransformer.jsx` uses `useDebouncedValue` and `CopyButton`.
+Source and operation identity immediately invalidate output controls during the
+300 ms debounce. Read-only Preview preserves the entire result; the panes use
+the full content width and stack below 768 px. FileReader supports local bytes;
+Blob download creates `transformed.txt`. No content storage or network code.
+The registry entry matches every frozen field; `ListFilter` is imported and
+mapped on DirectoryGrid lines 16 and 24. Only those lists were changed there.
+
+Measured in Chromium `156.0.8078.4`, Python Playwright `1.64.0`, ml01a, against
+built gate-1 output served by pinned `npx vite preview`. F2 repetitions plus
+ASCII padding total exactly 2,097,152 UTF-8 bytes. Five pipeline evaluations:
+55.3, 39.7, 45.6, 41.6, 39.0 ms. Maximum 55.3 ms < 100 ms: no worker needed.
+An earlier Node timing probe accidentally measured 2,097,154 bytes (73.18-99.34
+ms); it is not the acceptance measurement. Preview/output are never truncated.
+
+Validation: ten component tests cover zero-click F2/Copy, stale operation edits,
+Apply/Undo exact list, eleven Applies yielding ten snapshots, all three rejected
+file types, BOM + F4 exact download bytes, exact 2 MiB acceptance, restore/cancel,
+mixed-ending notice, invalid-operation disabling/removal. Component plus registry
+run: 31/31 pass (8.47 s). Full suite: 66 files / 621 tests pass (10.30 s).
+Registry deletion in a separate scratch copy exits 1: array length and
+`getToolCount` expectations both fail; scratch removed. New files have no raw
+black/white classes or em dashes; `git diff --check` passes.
+
+Gate-2 committed-checkout parity receipt follows before gate-3 implementation.
+No out-of-scope changes proposed at this checkpoint. No operator questions.

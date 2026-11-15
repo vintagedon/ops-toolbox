@@ -13,7 +13,7 @@ import {
   Network, ListTree, KeyRound, Lock, Terminal, FileLock, Hash, ShieldCheck,
   Braces, Binary, GitCompare, Table, Database, Workflow, Link as LinkIcon,
   MonitorSmartphone, LockKeyhole, Link2, CalendarClock, Regex, Type,
-  Fingerprint, Clock, FileText, Cpu, EyeOff, Github,
+  Fingerprint, Clock, FileText, ListFilter, Cpu, EyeOff, Github,
 } from 'lucide-react';
 
 /** Registry icon name -> lucide component. */
@@ -21,7 +21,7 @@ const ICONS = {
   Network, ListTree, KeyRound, Lock, Terminal, FileLock, Hash, ShieldCheck,
   Braces, Binary, GitCompare, Table, Database, Workflow, Link: LinkIcon,
   MonitorSmartphone, LockKeyhole, Link2, CalendarClock, Regex, Type,
-  Fingerprint, Clock, FileText,
+  Fingerprint, Clock, FileText, ListFilter,
 };
 
 /**
