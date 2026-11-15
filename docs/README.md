@@ -23,6 +23,7 @@ Project documentation including tool reference, architecture overview, templates
 ```
 docs/
 ├── architecture.md                 # SPA architecture overview
+├── specs/                          # Weekend release specifications (draft)
 ├── apps/                           # Tool documentation
 │   ├── tool-reference.md           # Complete reference for all 24 tools
 │   ├── mermaid-renderer.md         # Detailed Mermaid Renderer guide
@@ -45,6 +46,7 @@ docs/
 | Directory | Description |
 |-----------|-------------|
 | [apps/](apps/README.md) | Tool reference documentation |
+| [specs/](specs/README.md) | Sequenced release specifications and acceptance gates |
 | [documentation-standards/](documentation-standards/README.md) | Template library for READMEs, KB articles, script headers, and tagging |
 
 ---

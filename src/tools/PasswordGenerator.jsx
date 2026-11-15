@@ -6,19 +6,15 @@
  * @see https://github.com/radioastronomyio/ops-toolbox
  */
 
-import { useState, useEffect } from 'react';
-import { generatePassword, calculateEntropy, buildCharset, generatePassphrase, calculatePassphraseEntropy } from '../lib/password.js';
-import { EFF_SHORT_WORDLIST } from '../lib/wordlist.js';
+import { useState, useEffect, useRef } from 'react';
+import { generatePassword, calculateEntropy, buildCharset, generatePassphrase, calculatePassphraseEntropy, generateBatch, MAX_PADDING_DIGITS } from '../lib/password.js';
+import { serializeSecretBatchCsv } from '../lib/secretBatch.js';
+import { DEFAULT_WORDLIST_ID, WORDLIST_OPTIONS, SEPARATOR_OPTIONS, evaluateSeparatorPolicy, loadWordlist } from '../lib/wordlists.js';
 import { useClipboard } from '../hooks/useClipboard';
+import CopyButton from '../components/CopyButton';
 import ErrorBanner from '../components/ErrorBanner';
 
-const SEPARATOR_OPTIONS = [
-  { label: 'Hyphen (-)', value: '-' },
-  { label: 'Dot (.)', value: '.' },
-  { label: 'Underscore (_)', value: '_' },
-  { label: 'Space ( )', value: ' ' },
-  { label: 'None', value: '' },
-];
+const ALL_SEPARATORS_OFFERED = SEPARATOR_OPTIONS.map((option) => ({ ...option, available: true, reason: null }));
 
 export default function PasswordGenerator() {
   const [mode, setMode] = useState('password'); // 'password' | 'passphrase'
@@ -32,13 +28,70 @@ export default function PasswordGenerator() {
 
   // Passphrase mode state
   const [wordCount, setWordCount] = useState(6);
+  const [wordlistId, setWordlistId] = useState(DEFAULT_WORDLIST_ID);
   const [separator, setSeparator] = useState('-');
+  const [separatorOptions, setSeparatorOptions] = useState(ALL_SEPARATORS_OFFERED);
+  const [separatorNotice, setSeparatorNotice] = useState(null);
   const [capitalize, setCapitalize] = useState(false);
+  const [numericPaddingEnabled, setNumericPaddingEnabled] = useState(false);
+  const [paddingDigits, setPaddingDigits] = useState(1);
 
-  const [output, setOutput] = useState('');
-  const [entropy, setEntropy] = useState(0);
+  const [count, setCount] = useState(1);
+  const [results, setResults] = useState([]);
   const [error, setError] = useState(null);
+  const [isLoadingWordlist, setIsLoadingWordlist] = useState(false);
   const { copy, copied } = useClipboard();
+  // Incremented on every generation request and by effect cleanup; an in-flight
+  // load applies its state only while its request is still the newest one.
+  const requestIdRef = useRef(0);
+  const output = results[0]?.value ?? '';
+  const entropy = results[0]?.entropy ?? 0;
+
+  const generatePassphraseResults = async () => {
+    const requestId = ++requestIdRef.current;
+    setIsLoadingWordlist(true);
+    setError(null);
+    try {
+      const wordlist = await loadWordlist(wordlistId);
+      if (requestIdRef.current !== requestId) return;
+
+      // A separator is selectable only when every word sequence stays
+      // recoverable from the output; a withdrawn selection resolves to the
+      // first available separator instead of ever generating from it.
+      const offered = evaluateSeparatorPolicy(wordlist, capitalize);
+      setSeparatorOptions(offered);
+      const withdrawn = offered.filter((option) => !option.available);
+      setSeparatorNotice(withdrawn.length > 0
+        ? `Not offered with this list and capitalization: ${withdrawn.map((option) => option.label).join(', ')} — ${withdrawn[0].reason}.`
+        : null);
+      const selected = offered.find((option) => option.value === separator);
+      if (!selected.available) {
+        const fallback = offered.find((option) => option.available);
+        if (!fallback) {
+          setError('No separator can be offered for this wordlist and capitalization');
+          setResults([]);
+          return;
+        }
+        setSeparator(fallback.value);
+        return;
+      }
+
+      const appliedPaddingDigits = numericPaddingEnabled ? paddingDigits : 0;
+      setResults(generateBatch(
+        count,
+        () => generatePassphrase(wordCount, separator, capitalize, wordlist, appliedPaddingDigits),
+        calculatePassphraseEntropy(wordCount, wordlist.length, appliedPaddingDigits),
+      ));
+    } catch (err) {
+      if (requestIdRef.current !== requestId) return;
+      setError(err.message);
+      setResults([]);
+    } finally {
+      if (requestIdRef.current === requestId) {
+        setIsLoadingWordlist(false);
+      }
+    }
+  };
 
   // Auto-generate on any option change; entropy = log2(charset^length)
   useEffect(() => {
@@ -47,44 +100,61 @@ export default function PasswordGenerator() {
       const charset = buildCharset(options);
       if (length && charset) {
         try {
-          const pw = generatePassword(length, options);
-          setOutput(pw);
-          setEntropy(calculateEntropy(pw.length, charset.length));
+          setResults(generateBatch(
+            count,
+            () => generatePassword(length, options),
+            (value) => calculateEntropy(value.length, charset.length),
+          ));
           setError(null);
         } catch (err) {
           setError(err.message);
-          setOutput('');
-          setEntropy(0);
+          setResults([]);
         }
       } else {
         setError('Enable at least one character set');
-        setOutput('');
-        setEntropy(0);
+        setResults([]);
       }
-    } else {
-      const phrase = generatePassphrase(wordCount, separator, capitalize);
-      setOutput(phrase);
-      // Passphrase entropy = log2(wordlist_size ^ word_count)
-      setEntropy(calculatePassphraseEntropy(wordCount, EFF_SHORT_WORDLIST.length));
-      setError(null);
+      setIsLoadingWordlist(false);
+      return;
     }
-  }, [mode, length, uppercase, lowercase, numeric, special, wordCount, separator, capitalize]);
+
+    generatePassphraseResults();
+    return () => {
+      requestIdRef.current += 1;
+    };
+  }, [mode, length, uppercase, lowercase, numeric, special, wordCount, wordlistId, separator, capitalize, numericPaddingEnabled, paddingDigits, count]);
 
   const handleRegenerate = () => {
     if (mode === 'password') {
       const options = { uppercase, lowercase, numeric, special };
       const charset = buildCharset(options);
       if (charset) {
-        const pw = generatePassword(length, options);
-        setOutput(pw);
-        setEntropy(calculateEntropy(pw.length, charset.length));
-        setError(null);
+        try {
+          setResults(generateBatch(
+            count,
+            () => generatePassword(length, options),
+            (value) => calculateEntropy(value.length, charset.length),
+          ));
+          setError(null);
+        } catch (err) {
+          setError(err.message);
+          setResults([]);
+        }
       }
     } else {
-      const phrase = generatePassphrase(wordCount, separator, capitalize);
-      setOutput(phrase);
-      setEntropy(calculatePassphraseEntropy(wordCount, EFF_SHORT_WORDLIST.length));
+      generatePassphraseResults();
     }
+  };
+
+  const handleDownloadCsv = () => {
+    const csv = serializeSecretBatchCsv(results);
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `generated-${mode}s.csv`;
+    link.click();
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -164,6 +234,26 @@ export default function PasswordGenerator() {
             </>
           ) : (
             <>
+              {/* Wordlist selector */}
+              <div>
+                <label htmlFor="wordlist-selector" className="block text-sm font-medium text-text-secondary mb-2">
+                  Wordlist
+                </label>
+                <select
+                  id="wordlist-selector"
+                  value={wordlistId}
+                  onChange={(e) => setWordlistId(e.target.value)}
+                  className="max-w-full bg-surface-2 text-text-primary rounded-md px-3 py-2 border border-border-subtle"
+                >
+                  {WORDLIST_OPTIONS.map((option) => (
+                    <option key={option.id} value={option.id}>{option.label}</option>
+                  ))}
+                </select>
+                <p className="mt-2 text-sm text-text-secondary">
+                  Larger lists provide more entropy per randomly selected word.
+                </p>
+              </div>
+
               {/* Word count slider */}
               <div>
                 <label htmlFor="word-count-slider" className="block text-sm font-medium text-text-secondary mb-2">
@@ -185,16 +275,20 @@ export default function PasswordGenerator() {
 
               {/* Separator selector */}
               <div>
-                <label className="block text-sm font-medium text-text-secondary mb-2">Separator</label>
+                <label htmlFor="separator-selector" className="block text-sm font-medium text-text-secondary mb-2">Separator</label>
                 <select
+                  id="separator-selector"
                   value={separator}
                   onChange={(e) => setSeparator(e.target.value)}
                   className="bg-surface-2 text-text-primary rounded-md px-3 py-2 border border-border-subtle"
                 >
-                  {SEPARATOR_OPTIONS.map(opt => (
-                    <option key={opt.label} value={opt.value}>{opt.label}</option>
+                  {separatorOptions.map((option) => (
+                    <option key={option.label} value={option.value} disabled={!option.available}>{option.label}</option>
                   ))}
                 </select>
+                {separatorNotice && (
+                  <p role="note" className="mt-2 text-sm text-status-warning">{separatorNotice}</p>
+                )}
               </div>
 
               {/* Capitalize toggle */}
@@ -207,30 +301,120 @@ export default function PasswordGenerator() {
                 </button>
                 <span className="text-sm text-text-secondary">Capitalize first letter of each word</span>
               </div>
+
+              {/* Numeric padding */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-3">
+                  <input
+                    id="numeric-padding"
+                    type="checkbox"
+                    checked={numericPaddingEnabled}
+                    onChange={(e) => setNumericPaddingEnabled(e.target.checked)}
+                    className="h-4 w-4 accent-accent"
+                  />
+                  <label htmlFor="numeric-padding" className="text-sm font-medium text-text-secondary">
+                    Append numeric padding
+                  </label>
+                </div>
+                <div>
+                  <label htmlFor="padding-digits" className="block text-sm font-medium text-text-secondary mb-2">
+                    Padding digits
+                  </label>
+                  <input
+                    id="padding-digits"
+                    type="number"
+                    min="1"
+                    max={MAX_PADDING_DIGITS}
+                    value={paddingDigits}
+                    disabled={!numericPaddingEnabled}
+                    onChange={(e) => {
+                      const parsed = Number.parseInt(e.target.value, 10);
+                      const next = Number.isNaN(parsed) ? 1 : parsed;
+                      setPaddingDigits(Math.min(MAX_PADDING_DIGITS, Math.max(1, next)));
+                    }}
+                    className="w-24 bg-surface-2 text-text-primary rounded-md px-3 py-2 border border-border-subtle disabled:opacity-50"
+                  />
+                </div>
+                <p className="text-sm text-text-secondary">
+                  Numeric padding helps satisfy password rules. Each random digit adds about 3.3 bits of entropy; another word adds about 10–13 bits, depending on the wordlist.
+                </p>
+              </div>
             </>
           )}
 
+          {/* Generation count */}
+          <div>
+            <label htmlFor="generation-count" className="block text-sm font-medium text-text-secondary mb-2">
+              Generation Count
+            </label>
+            <input
+              id="generation-count"
+              type="number"
+              min="1"
+              max="50"
+              value={count}
+              onChange={(e) => {
+                const nextCount = Number.parseInt(e.target.value, 10) || 1;
+                setCount(Math.min(50, Math.max(1, nextCount)));
+              }}
+              className="w-24 bg-surface-2 text-text-primary rounded-md px-3 py-2 border border-border-subtle"
+            />
+            <p className="mt-2 text-sm text-text-secondary">Generate one value or a distinct batch of up to 50.</p>
+          </div>
+
           {/* Action buttons */}
-          <div className="flex gap-4">
-            <button
-              onClick={() => copy(output)}
-              disabled={!output || copied}
-              className="px-6 py-3 bg-accent hover:bg-accent-hover border-accent text-black rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {copied ? 'Copied!' : 'Copy to Clipboard'}
-            </button>
+          <div className="flex flex-wrap gap-4">
+            {count === 1 ? (
+              <button
+                onClick={() => copy(output)}
+                disabled={!output || copied || isLoadingWordlist}
+                className="px-6 py-3 bg-accent hover:bg-accent-hover border-accent text-black rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {copied ? 'Copied!' : 'Copy to Clipboard'}
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => copy(results.map(({ value }) => value).join('\n'))}
+                  disabled={isLoadingWordlist || results.length === 0 || copied}
+                  className="px-6 py-3 bg-accent hover:bg-accent-hover border-accent text-black rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {copied ? 'Copied!' : 'Copy All'}
+                </button>
+                <button
+                  onClick={handleDownloadCsv}
+                  disabled={isLoadingWordlist || results.length === 0}
+                  className="px-6 py-3 bg-surface-2 hover:bg-surface-3 border border-border-subtle text-text-primary rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Download CSV
+                </button>
+              </>
+            )}
             <button
               onClick={handleRegenerate}
-              className="px-6 py-3 bg-status-success hover:opacity-90 border-status-success text-black rounded-md font-medium"
+              disabled={isLoadingWordlist}
+              className="px-6 py-3 bg-status-success hover:opacity-90 border-status-success text-black rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Regenerate
+              {isLoadingWordlist ? 'Loading wordlist…' : 'Regenerate'}
             </button>
           </div>
+
+          {count > 1 && (
+            <p role="note" className="text-sm text-status-warning">
+              Caution: a downloaded CSV contains unencrypted secrets on disk. Store or delete it carefully.
+            </p>
+          )}
         </div>
 
         {/* Right panel: Output */}
         <div className="space-y-4">
           <ErrorBanner message={error} />
+
+          {isLoadingWordlist && (
+            <div role="status" className="p-4 bg-surface-1 border border-border-subtle rounded-md text-text-secondary">
+              Loading selected wordlist…
+            </div>
+          )}
 
           {!output && !error && (
             <div className="p-6 bg-surface-1 border border-border-subtle rounded-md text-text-secondary">
@@ -238,7 +422,7 @@ export default function PasswordGenerator() {
             </div>
           )}
 
-          {output && (
+          {output && count === 1 && !isLoadingWordlist && (
             <>
               <div className="mb-6">
                 <h2 className="text-2xl font-bold text-text-primary mb-4">Generated {mode === 'passphrase' ? 'Passphrase' : 'Password'}</h2>
@@ -263,6 +447,45 @@ export default function PasswordGenerator() {
                     <span className="text-status-error">Weak password</span>
                   )}
                 </p>
+              </div>
+            </>
+          )}
+
+          {results.length > 1 && !isLoadingWordlist && (
+            <>
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold text-text-primary mb-2">
+                  Generated {mode === 'passphrase' ? 'Passphrase' : 'Password'} Batch
+                </h2>
+                <p className="text-text-secondary text-sm">Each row is generated independently and includes its entropy estimate.</p>
+              </div>
+
+              <div className="overflow-x-auto border border-border-subtle rounded-md">
+                <table className="w-full text-left">
+                  <caption className="sr-only">Generated {mode} batch</caption>
+                  <thead className="bg-surface-2 text-text-secondary">
+                    <tr>
+                      <th scope="col" className="px-3 py-2 text-sm font-medium">#</th>
+                      <th scope="col" className="px-3 py-2 text-sm font-medium">Value</th>
+                      <th scope="col" className="px-3 py-2 text-sm font-medium whitespace-nowrap">Entropy (bits)</th>
+                      <th scope="col" className="px-3 py-2 text-sm font-medium">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border-subtle bg-surface-1">
+                    {results.map((result, index) => (
+                      <tr key={result.value}>
+                        <td className="px-3 py-3 text-sm text-text-secondary">{index + 1}</td>
+                        <td className="px-3 py-3">
+                          <code className="font-mono text-sm text-text-primary break-all">{result.value}</code>
+                        </td>
+                        <td className="px-3 py-3 text-sm text-status-success whitespace-nowrap">{result.entropy} bits</td>
+                        <td className="px-3 py-3">
+                          <CopyButton text={result.value} label={`Copy row ${index + 1}`} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </>
           )}

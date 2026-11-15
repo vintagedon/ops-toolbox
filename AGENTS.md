@@ -5,7 +5,7 @@ Entry point for AI coding agents working on this repository.
 ## Project Identity
 
 **Domain:** IT Operations / Web Utilities
-**Repository:** https://github.com/radioastronomyio/ops-toolbox
+**Repository:** https://github.com/vintagedon/ops-toolbox
 **Live:** https://opstoolbox.dev/
 **Purpose:** A collection of 24 client-side utility web tools for IT operations and platform engineering. All processing happens in the browser; no backends, no data transmission. Hosted on Azure Static Web Apps.
 
@@ -37,7 +37,7 @@ Single-page application with React Router v6. Tools are lazy-loaded via `React.l
 - **Pure logic** in `src/lib/` tested in `tests/lib/` (fast, no DOM)
 - **React components** tested in `tests/tools/`, `tests/components/`, `tests/hooks/`
 - **Pattern absence tests** in `tests/migration/` ensure banned patterns (hand-rolled clipboard, manual debounce) don't recur
-- **Run:** `npm run test` (single run, 474 tests across 56 files) or `npm run test:watch`
+- **Run:** `npm run test` (single run) or `npm run test:watch`
 
 ## Documentation
 
@@ -46,7 +46,7 @@ Single-page application with React Router v6. Tools are lazy-loaded via `React.l
 - **`docs/design/contrast-standard.md`** — WCAG AA contrast rule every palette is audited against
 - **`docs/design/typography-roles.md`** — UI/mono type roles, the type scale, and the micro-label convention
 - **`docs/documentation-standards/`** — Template library for READMEs, KB articles, script headers
-- All source files have JSDoc `@file` headers per `docs/documentation-standards/script-header-javascript.md`
+- All source files have JSDoc `@file` headers; header templates live in `docs/documentation-standards/`
 
 ## Key Constraints
 
@@ -76,19 +76,45 @@ Single-page application with React Router v6. Tools are lazy-loaded via `React.l
 - Do not use `backdrop-filter` / `backdrop-blur` anywhere except the sticky header
 - Do not load fonts from an external CDN (Google Fonts) — fonts are bundled via `@fontsource-variable`; the air-gap claim must survive a DevTools Network-tab check
 
-## Specs
+## Executing a Work Spec
 
-Feature specifications live at the agents root (`/opt/agents/repos/spec/`), archived by month after execution (`spec/2026-MM/`). These are reference documents for completed work:
+Repository work uses the in-repo specifications at `docs/specs/` and the table below. The November 14 weekend specifications are drafts for review; preparation does not dispatch feature implementation.
+
+| Element | Convention |
+|---------|-----------|
+| Spec | `docs/specs/spec-m<major>-<minor>-<slug>.md` |
+| Tracking | One GitHub issue per task. The issue is a stable pointer; the spec is what iterates |
+| Branch | `task/<major>-<minor>-<slug>` |
+| Gates | One commit per gate, each referencing its gate number (for example `fix(build): track package-lock.json (1.0.2)`) |
+| Worklog | `work-logs/worklog-YYYY-MM-DD-<slug>.md`, appended at each gate, sealed at close |
+| Review surface | `docs/specs/reviews/review-m<major>-<minor>-<slug>.md`, where the spec ends at an operator decision |
+| Close | One pull request carrying `Closes #N`, CI green |
+
+Data decisions first, architecture second, in both commits and the worklog.
+
+**Push posture.** This is a public repository. Gates commit locally and the operator reviews before push. The executor does not push `main`, does not mark a pull request ready, and does not merge.
+
+**Platform-mode work** targeting shared infrastructure or the project wiki stays in the agents-root queue and follows the `spec-startup` and `spec-closeout` skills. A GitHub wiki has no issues and no pull requests, so it cannot run in repo mode.
+
+### Active specs
+
+None executing. Drafts for dependency maintenance, Sentinel workspace, Text Transformer, cloud subnet planning, and release editions are indexed in [docs/specs/README.md](docs/specs/README.md).
+
+### Archived specs
+
+Earlier specifications live at the agents root (`/opt/agents/repos/spec/2026-MM/`) and are reference documents for completed work:
 
 - `2026-06/2026-06-21-opstoolbox-spec-01-sentinel-pattern-maturation.md` — `data-theme` mechanism, High-Contrast Slate, accessibility baseline, StatusBadge, typography discipline
 - `2026-06/2026-06-24-opstoolbox-spec-01-launch-ux.md` — MAC removal, scannable directory, social cards, `/about`, scaffolding
 - `2026-06/2026-06-24-opstoolbox-spec-02-oss-readiness.md` — markdownify README, self-host Docker image with SPA-aware nginx, OG social card
+- `2026-06/2026-06-24-opstoolbox-spec-03-passphrase-depth.md` — lazy-loaded EFF Long and original Diceware wordlists, honest numeric padding entropy, batch generation with CSV export
 - `2026-06/2026-06-25-opstoolbox-spec-05-fonts-and-discoverability.md` — bundled `@fontsource-variable` fonts, build-time `sitemap.xml`/`llms.txt`/`robots.txt`, docs sweep
+- `2026-07/2026-07-24-opstoolbox-spec-01-wiki-explainers.md` — GitHub wiki navigation and four evergreen explainer pages (platform-mode work, executed against the wiki clone)
 - Earlier work (original tool implementations, v3 architecture fixes, primitives migration, v4 design system) predates the agents-root spec archive.
 
 ## Execution Environment
 
-**Primary execution:** ML01 (`/opt/agents/repos/ops-toolbox/`)
+**Primary execution:** ML01a (`/opt/agents/repos/ops-toolbox/`)
 **Agent runtime:** OpenCode (global config at `~/.config/opencode/opencode.json`)
 **Session management:** aoe (Agent of Empires)
 **Strategic work:** Claude.ai Projects
@@ -102,6 +128,7 @@ ops-toolbox/
 │   └── workflows/                  # Azure Static Web Apps CI/CD
 ├── assets/                         # Repository images (logo source copy)
 ├── docs/
+│   ├── specs/                      # Drafts and executable repository work specs
 │   ├── apps/                       # Tool reference documentation
 │   ├── design/                     # Contrast standard, typography roles
 │   └── documentation-standards/    # Templates, tagging strategy

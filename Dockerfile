@@ -9,6 +9,9 @@
 FROM node:22-alpine AS build
 WORKDIR /app
 
+# Match CI's npm version; older npm mis-resolves optional Vite peers in this lockfile.
+RUN npm install --global npm@12.0.2
+
 # Reproducible install from the lockfile (cached unless deps change).
 COPY package.json package-lock.json ./
 RUN npm ci

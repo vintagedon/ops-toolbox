@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { generatePassword, calculateEntropy, buildCharset, generatePassphrase, calculatePassphraseEntropy } from '../../src/lib/password.js';
+import { generatePassword, calculateEntropy, buildCharset, generatePassphrase, calculatePassphraseEntropy, generateBatch } from '../../src/lib/password.js';
 import { EFF_SHORT_WORDLIST } from '../../src/lib/wordlist.js';
 
 describe('Password Generator', () => {
@@ -175,6 +175,57 @@ describe('generatePassphrase', () => {
     expect(result.split('.')).toHaveLength(3);
   });
 
+  it('uses the supplied wordlist', () => {
+    const wordlist = ['alpha', 'bravo'];
+    const result = generatePassphrase(4, '-', false, wordlist);
+    expect(result.split('-')).toHaveLength(4);
+    result.split('-').forEach((word) => expect(wordlist).toContain(word));
+  });
+
+  it('rejects an empty supplied wordlist', () => {
+    expect(() => generatePassphrase(4, '-', false, [])).toThrow('A non-empty wordlist is required');
+  });
+
+  it('appends the requested number of numeric padding digits', () => {
+    const result = generatePassphrase(3, '-', false, ['alpha'], 4);
+    expect(result).toMatch(/^alpha-alpha-alpha\d{4}$/);
+  });
+
+  it('counts padding entropy when generation requests no words', () => {
+    expect(generatePassphrase(0, '-', false, ['alpha'], 5)).toMatch(/^\d{5}$/);
+    expect(calculatePassphraseEntropy(0, 1, 5)).toBe(16);
+  });
+
+  it('draws numeric padding from Web Crypto', () => {
+    const getRandomValues = vi.spyOn(window.crypto, 'getRandomValues');
+    generatePassphrase(3, '-', false, ['alpha'], 2);
+    expect(getRandomValues).toHaveBeenCalledWith(expect.any(Uint8Array));
+  });
+
+  it('rejects invalid numeric padding counts', () => {
+    expect(() => generatePassphrase(3, '-', false, ['alpha'], -1)).toThrow('Padding digit count must be an integer between 0 and 12');
+    expect(() => generatePassphrase(3, '-', false, ['alpha'], 1.5)).toThrow('Padding digit count must be an integer between 0 and 12');
+  });
+
+  it('rejects padding counts above the advertised bound with a range error', () => {
+    expect(() => generatePassphrase(3, '-', false, ['alpha'], 13)).toThrow(RangeError);
+    expect(() => generatePassphrase(3, '-', false, ['alpha'], 13)).toThrow('Padding digit count must be an integer between 0 and 12');
+    expect(() => generatePassphrase(3, '-', false, ['alpha'], 32769)).toThrow(RangeError);
+  });
+
+  it('throws the padding range error before any Web Crypto call', () => {
+    const getRandomValues = vi.spyOn(window.crypto, 'getRandomValues');
+    getRandomValues.mockClear();
+    expect(() => generatePassphrase(3, '-', false, ['alpha'], 13)).toThrow(RangeError);
+    expect(() => generatePassphrase(3, '-', false, ['alpha'], 32769)).toThrow(RangeError);
+    expect(getRandomValues).not.toHaveBeenCalled();
+  });
+
+  it('accepts the bound edges: 12 digits or none', () => {
+    expect(generatePassphrase(3, '-', false, ['alpha'], 12)).toMatch(/^alpha-alpha-alpha\d{12}$/);
+    expect(generatePassphrase(3, '-', false, ['alpha'], 0)).toMatch(/^alpha-alpha-alpha$/);
+  });
+
   it('two consecutive calls produce different results', () => {
     const a = generatePassphrase(6);
     const b = generatePassphrase(6);
@@ -191,8 +242,51 @@ describe('calculatePassphraseEntropy', () => {
     expect(calculatePassphraseEntropy(8, 1296)).toBe(82);
   });
 
+  it('uses the selected wordlist size', () => {
+    expect(calculatePassphraseEntropy(6, 7776)).toBe(77);
+    expect(calculatePassphraseEntropy(6, 7776)).toBeGreaterThan(calculatePassphraseEntropy(6, 1296));
+  });
+
+  it('adds digit entropy as digitCount × log2(10) before rounding', () => {
+    const paddedEntropy = calculatePassphraseEntropy(6, 1296, 3);
+    const expectedEntropy = Math.floor((6 * Math.log2(1296)) + (3 * Math.log2(10)));
+    expect(paddedEntropy).toBe(expectedEntropy);
+    expect(paddedEntropy).toBe(72);
+  });
+
   it('wordCount=0 → 0', () => {
     expect(calculatePassphraseEntropy(0, 1296)).toBe(0);
+  });
+});
+
+describe('generateBatch', () => {
+  it('returns the requested number of distinct values with per-row entropy', () => {
+    const candidates = ['alpha', 'alpha', 'bravo', 'charlie'];
+    const results = generateBatch(3, () => candidates.shift(), (value) => value.length);
+
+    expect(results).toEqual([
+      { value: 'alpha', entropy: 5 },
+      { value: 'bravo', entropy: 5 },
+      { value: 'charlie', entropy: 7 },
+    ]);
+  });
+
+  it('accepts a fixed entropy value', () => {
+    let index = 0;
+    expect(generateBatch(2, () => `value-${index++}`, 72)).toEqual([
+      { value: 'value-0', entropy: 72 },
+      { value: 'value-1', entropy: 72 },
+    ]);
+  });
+
+  it('validates count and generator inputs', () => {
+    expect(() => generateBatch(0, () => 'value', 1)).toThrow('Batch count must be a positive integer');
+    expect(() => generateBatch(1.5, () => 'value', 1)).toThrow('Batch count must be a positive integer');
+    expect(() => generateBatch(1, null, 1)).toThrow('Batch generation requires a value generator');
+  });
+
+  it('fails safely when a generator cannot produce enough distinct values', () => {
+    expect(() => generateBatch(2, () => 'same', 1)).toThrow('Unable to generate the requested number of distinct values');
   });
 });
 

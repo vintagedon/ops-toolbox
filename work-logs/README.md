@@ -22,7 +22,9 @@ Per-effort development history for ops-toolbox. Spec-execution worklogs and the 
 
 ```
 work-logs/
-└── README.md     # This file
+├── worklog-2026-09-20-swa-token-auth.md  # Historical deployment repair
+├── worklog-2026-11-14-main-closeout.md   # ML01a closeout and weekend preparation
+└── README.md                           # This file
 ```
 
 ---
