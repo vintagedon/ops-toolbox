@@ -9,11 +9,11 @@ Entry point for AI coding agents working on this repository.
 **Live:** https://opstoolbox.dev/
 **Purpose:** A collection of 24 client-side utility web tools for IT operations and platform engineering. All processing happens in the browser; no backends, no data transmission. Hosted on Azure Static Web Apps.
 
-**Stack:** React 18, Vite 5, React Router v6, Tailwind CSS v3, Vitest, theming via `data-theme` (Light, Dark, High-Contrast Slate, System)
+**Stack:** React 18, Vite 8, React Router v7, Tailwind CSS v3, Vitest, theming via `data-theme` (Light, Dark, High-Contrast Slate, System)
 
 ## Architecture
 
-Single-page application with React Router v6. Tools are lazy-loaded via `React.lazy()` + `Suspense`.
+Single-page application with React Router v7. Tools are lazy-loaded via `React.lazy()` + `Suspense`.
 
 - **`src/lib/toolRegistry.js`** — Canonical tool registry (data-only, no React). All routing, directory grid, badges, and search derive from this.
 - **`src/lib/`** — Pure utility functions (no React dependencies). Business logic lives here.

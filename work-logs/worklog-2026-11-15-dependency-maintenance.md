@@ -171,7 +171,7 @@ Vite 8.3.8, no esbuild, and baseline deprecations remain absent. PASS.
 BrowserRouter, lazy routes and NotFound remain unchanged. npm reports only the
 three low Mermaid-family entries after this upgrade. Clean candidate commit `9376e9b` at `/tmp/ops10-gate3` passed with Node
 **v22.23.5** / npm **12.0.2**: `npm ci` 2.35 s, **550 tests in 63 files**
-(6.24 s), build 26 routes (1.04 s), Router DOM/core **7.18.5** only.
+(6.24 s), build 26 routes (1.03 s), Router DOM/core **7.18.5** only.
 Audit: three low entries, zero moderate/high/critical.
 
 Playwright **1.64.1** / Chromium **156.0.8078.4**, bundled revision **1248**,
@@ -232,3 +232,48 @@ and JSON sanitization is untouched.
 
 The checkpoint is amended into the same gate commit, then its final commit is
 validated in a fresh clean checkout before release proof.
+
+## Gate 1.0.5 — Release proof and review surface
+
+Final Mermaid gate `d3894ab`, clean `/tmp/ops10-gate4-final`, Node v22.23.5 /
+npm 12.0.2: `npm ci` 2.45 s; **554 tests / 64 files** (6.38 s), build 1.15 s,
+26 prerendered routes; audit **0 entries**. Fresh-context route/history and full
+Mermaid browser checks repeated against that exact commit: 27 paths, six diagram
+checks, valid SVG/PNG files, no exceptions/dialogs/onerror/external requests. PASS.
+
+Update only the authorized stack references to Vite 8 / React Router v7:
+AGENTS lines 12/16, README Vite badge and routing diagram, architecture routing
+references and tagging strategy Vite description. React/Tailwind/Vitest badges
+stay accurate without edits. Complete review: R1–R7 repaired; no residuals;
+D1 UNAVAILABLE, Dockerfile unchanged; W1–W3 proposed diffs only, with closed
+questions, source-line evidence and production/preview implications. O1–O3
+record proposed out-of-scope work. No workflow, global config or primary-checkout
+mutation. No source edit was required by any upgrade.
+
+Evidence limitation: registry-only networking prevents live CI/action.yml reads.
+The W-items cite the authorized spec's observed run 43672134033 and freshly
+verified local workflow lines, explicitly marking resolved SHAs/full declared
+inputs and current warning persistence UNVERIFIED. They require separate review;
+no guessed declaration or live-CI acceptance is claimed. The gate's full upstream
+action-declaration validation is unavailable within this dispatch. Similarly,
+D1 is not a passed image build. Neither limitation authorizes broader access.
+
+Clean release candidate `596cf51` at `/tmp/ops10-gate5`: Node **v22.23.5** /
+npm **12.0.2**, `npm ci` 2.54 s; **554 tests / 64 files** (6.75 s), build
+1.18 s / 26 prerendered routes; fresh `npm audit --json` exits **0**, all severity
+counts and total **0**. Playwright fresh context against built preview: all **27
+paths** and history restore pass; requests outside `http://127.0.0.1:4177` are
+aborted and logged, **aborted-request log empty**, **0 page exceptions**.
+
+`rg -n 'Vite 5|React Router v6'` over all four scoped documents exits **1** (no
+matches), as does the spec's equivalent grep check. `git diff main --stat --
+.github/ Dockerfile` is empty. AGENTS diff changes exactly original lines **12
+and 16**. `git diff --check` passes. No existing repository file was deleted.
+
+Manifest SHA-256 `7881c303904769dba739f378051f7bcd7a896f94465772161f5216b3a8e420d2`;
+lock SHA-256 `f394f501400fe521828d69ef9a46c102dcdb539271ef3f2fb1003cb328efa897`;
+unchanged Markdown test SHA-256
+`8e412b33a422fe0c91e9783bd4ade541dc4460cdf8c8f228e7f105d19c8b8323`.
+This checkpoint is amended into the same gate commit; the final gate commit is
+checked in another clean worktree before closeout. Local release checks PASS;
+Docker and upstream workflow-metadata checks remain explicitly UNAVAILABLE.

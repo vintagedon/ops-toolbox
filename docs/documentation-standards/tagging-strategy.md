@@ -88,7 +88,7 @@ Uncontrolled tagging leads to synonyms fragmenting search, inconsistent granular
 | Tag | Technology |
 |-----|-----------|
 | `react` | React 18 components and hooks |
-| `vite` | Vite 5 build tooling |
+| `vite` | Vite 8 build tooling |
 | `tailwind` | Tailwind CSS v3 styling |
 | `vitest` | Vitest test framework |
 | `javascript` | JavaScript source files |
