@@ -58,7 +58,17 @@ Both `prerender.mjs` and `generate-meta.mjs` import `toolRegistry` from `src/lib
 
 ---
 
-## 4. Related
+## 4. Public-domain verification
+
+The public domain uses [Cloudflare managed robots.txt](https://developers.cloudflare.com/bots/additional-configurations/managed-robots-txt/),
+which prepends crawler policy to the origin file. Verification permits only that
+marked prefix on `https://opstoolbox.dev/robots.txt`, with a Cloudflare plain-text
+response. The remaining origin bytes must match their SHA-256 exactly. The verifier
+logs this distinction. It does not validate the edge-owned crawler policy itself;
+that policy remains managed in Cloudflare. All other files, the manifest, Azure
+origin and preview domains retain exact-byte checks. No crawler settings are changed.
+
+## 5. Related
 
 | Document | Relationship |
 |----------|--------------|

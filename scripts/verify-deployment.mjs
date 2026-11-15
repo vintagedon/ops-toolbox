@@ -11,6 +11,28 @@ import { pathToFileURL } from 'node:url';
 const MANIFEST = 'deployment.json';
 const digest = bytes => createHash('sha256').update(bytes).digest('hex');
 
+// Cloudflare prepends its managed policy to this site's robots.txt. Only the
+// provider-owned prefix is outside the build; the remaining bytes must still hash
+// exactly. Origin/preview hosts and every application file stay byte-exact.
+function originRobotsBytes(path, baseUrl, response, bytes) {
+  const base = new URL(baseUrl);
+  const served = new URL(response.url);
+  if (path !== 'robots.txt' || base.origin !== 'https://opstoolbox.dev' || base.pathname !== '/' ||
+      served.origin !== 'https://opstoolbox.dev' || served.pathname !== '/robots.txt' ||
+      response.headers.get('server')?.toLowerCase() !== 'cloudflare' ||
+      !/^text\/plain(?:;|$)/i.test(response.headers.get('content-type') || '')) return null;
+  const text = bytes.toString('utf8');
+  // Reject replacement decoding before using a string's byte length as an offset.
+  // Unique markers prevent a malformed first block from consuming later rules.
+  if (!Buffer.from(text, 'utf8').equals(bytes) ||
+      text.split('# BEGIN Cloudflare Managed content').length !== 2 ||
+      text.split('# END Cloudflare Managed Content').length !== 2) return null;
+  const prefix = text.match(
+    /^(?:#[^\r\n]*\r?\n|\r?\n)*# BEGIN Cloudflare Managed content\r?\n[\s\S]*?\r?\n# END Cloudflare Managed Content\r?\n\r?\n/
+  )?.[0];
+  return prefix ? bytes.subarray(Buffer.byteLength(prefix)) : null;
+}
+
 export async function writeManifest(directory, revision, run) {
   if (!/^[a-f0-9]{40}$/.test(revision || '') || !run) {
     throw new Error('A full source commit SHA and deployment run ID are required');
@@ -44,15 +66,22 @@ export async function verifyDeployment(directory, baseUrl) {
       signal: AbortSignal.timeout(20000),
     });
     if (!response.ok) throw new Error(`HTTP ${response.status}: ${path}`);
-    return Buffer.from(await response.arrayBuffer());
+    return { response, bytes: Buffer.from(await response.arrayBuffer()) };
   }
-  if (digest(await get(MANIFEST)) !== digest(manifestBytes)) {
+  if (digest((await get(MANIFEST)).bytes) !== digest(manifestBytes)) {
     throw new Error('Deployment manifest does not match the expected build');
   }
   // Keep network load bounded while verifying every published file.
   for (let offset = 0; offset < manifest.files.length; offset += 6) {
     await Promise.all(manifest.files.slice(offset, offset + 6).map(async file => {
-      if (digest(await get(file.path)) !== file.sha256) throw new Error(`Content mismatch: ${file.path}`);
+      const { response, bytes } = await get(file.path);
+      if (digest(bytes) === file.sha256) return;
+      const originBytes = originRobotsBytes(file.path, baseUrl, response, bytes);
+      if (originBytes && digest(originBytes) === file.sha256) {
+        console.log(`Verified robots.txt origin bytes at ${baseUrl}; Cloudflare managed prefix retained`);
+        return;
+      }
+      throw new Error(`Content mismatch: ${file.path}`);
     }));
   }
   return manifest.files.length;

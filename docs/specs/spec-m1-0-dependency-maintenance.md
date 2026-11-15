@@ -26,6 +26,17 @@ BrowserRouter app. KaTeX's issue requires preexisting prototype pollution or
 attacker-controlled option prototypes; no such path was established in closeout.
 These are applicability assessments, not a claim that the packages are patched.
 
+Production run [43659514318](https://github.com/vintagedon/ops-toolbox/actions/runs/43659514318)
+also reported CI maintenance warnings: checkout/setup-node action runtime
+deprecation, inputs `skip_api_build` and `production_branch` not declared by the
+resolved Azure deploy action, and an upcoming `ubuntu-latest` image migration.
+These did not stop deployment; that run failed later on the public robots.txt
+content check, repaired separately. Inventory the action versions, declared inputs,
+effective deployment behavior and runner image before proposing a workflow repair.
+The closeout's approval for locked installs and timeouts does not authorize these
+additional workflow changes; present the concrete diff for operator approval under
+AGENTS.md. Verify production/preview routing and preview cleanup after any repair.
+
 ## Gates
 
 1. **Inventory and decisions.** Refresh `npm audit --json`, inspect the lockfile and

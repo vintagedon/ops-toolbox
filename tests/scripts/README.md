@@ -19,3 +19,8 @@ related_documents:
 # Deployment verification tests
 
 `verifyDeployment.test.js` uses a local HTTP server to check matching content, stale deployment metadata, corrupted JavaScript, and an HTTP 200 SPA fallback returned for a missing asset. Run with `npm test -- tests/scripts/verifyDeployment.test.js`.
+
+Cloudflare cases verify the public domain's marked robots.txt prefix while rejecting
+changed origin rules, extra unmarked rules, malformed prefixes, wrong host/response
+metadata, and prefixed application files. Tests route requests to the local fixture;
+they do not contact production.
