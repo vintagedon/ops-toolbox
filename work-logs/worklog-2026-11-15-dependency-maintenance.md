@@ -158,3 +158,34 @@ esbuild/oxc warnings are absent from both test and build logs. The existing
 large-chunk warning remains visible. Audit: 5 entries, 0 high/critical.
 This checkpoint is amended into the same gate commit; its final commit is then
 rechecked in a fresh clean worktree before Router work begins.
+
+## Gate 1.0.3 — Router
+
+Final gate 1.0.2 commit `eb94783` was validated from clean
+`/tmp/ops10-gate2-final`: Node v22.23.5 / npm 12.0.2; `npm ci` 2.62 s;
+550 tests / 63 files (6.30 s); build 1.05 s, 26 routes. `npm ls` shows only
+Vite 8.3.8, no esbuild, and baseline deprecations remain absent. PASS.
+
+`npm install 'react-router-dom@^7.18.5'` updates Router DOM and core to
+7.18.5 under parity. No application or test compatibility edits were necessary:
+BrowserRouter, lazy routes and NotFound remain unchanged. npm reports only the
+three low Mermaid-family entries after this upgrade. Clean candidate commit `9376e9b` at `/tmp/ops10-gate3` passed with Node
+**v22.23.5** / npm **12.0.2**: `npm ci` 2.35 s, **550 tests in 63 files**
+(6.24 s), build 26 routes (1.04 s), Router DOM/core **7.18.5** only.
+Audit: three low entries, zero moderate/high/critical.
+
+Playwright **1.64.1** / Chromium **156.0.8078.4**, bundled revision **1248**,
+against local production preview port 4173: **27 direct loads passed** (24 tool
+paths, home, about, unknown path). Primary h1 text equals the pre-upgrade baseline
+on every path; unknown path shows `404` and `Tool Not Found`. App links navigate
+Subnet Calculator → directory → CIDR Range Expander; two browser Back operations
+restore Subnet Calculator, and two Forward operations restore CIDR Range Expander.
+**0 page exceptions; 0 aborted external requests.** No browser downloaded and no
+Playwright dependency added to the repo.
+
+Probe-only corrections before the baseline capture: Markdown sample content adds
+another h1, so assert the primary heading; CIDR's actual heading is `CIDR Range
+Expander`; directory links resolve relative paths, so match their href suffix.
+These were scratch harness assumptions, not app failures or compatibility edits.
+The checkpoint is amended into this gate commit and the final commit is rechecked
+from a clean worktree before gate 1.0.4.
