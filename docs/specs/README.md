@@ -16,24 +16,31 @@ persistent navigation, multifunction pages, Sentinel styling, a Text Transformer
 cloud subnet planning, and separate full and air-gapped releases. Details below
 are proposed defaults for review. Spec numbers identify work, not a product version.
 
-| Order | Specification | Result |
-|---|---|---|
-| 1 | [1.0 Dependency maintenance](spec-m1-0-dependency-maintenance.md) | Qualify major upgrades left after compatible closeout fixes |
-| 2 | [1.1 Sentinel workspace](spec-m1-1-sentinel-workspace.md) | Persistent navigation, useful front page, coherent themes and capability filters |
-| 3 | [1.2 Text Transformer](spec-m1-2-text-transformer.md) | Ordered text operations with original/input/preview and safe file handling |
-| 4 | [1.3 Cloud subnet planner](spec-m1-3-cloud-subnet-planner.md) | Local provider-aware IPv4 planning, visual map and reusable exports |
-| 5 | [1.4 Release editions](spec-m1-4-release-editions.md) | One codebase, full and air-gapped artifacts, first connected DNS tool |
+| Order | Specification | Result | State |
+|---|---|---|---|
+| 1 | [1.0 Dependency maintenance](spec-m1-0-dependency-maintenance.md) | Qualify major upgrades left after compatible closeout fixes | v0.2, awaiting GPT review |
+| 2 | [1.2 Text Transformer](spec-m1-2-text-transformer.md) | Ordered text operations with original/input/preview and safe file handling | v0.2, awaiting GPT review |
+| 3 | [1.1 Sentinel workspace](spec-m1-1-sentinel-workspace.md) | Persistent navigation, useful front page, coherent themes and capability filters | v0.2 draft; default theme undecided |
+| 4 | [1.3 Cloud subnet planner](spec-m1-3-cloud-subnet-planner.md) | Local provider-aware IPv4 planning, visual map and reusable exports | v0.1 draft |
+| 5 | [1.4 Release editions](spec-m1-4-release-editions.md) | One codebase, full and air-gapped artifacts, first connected DNS tool | v0.1 draft; connected tools undecided |
+
+Triad review (Claude, 2026-11-15) hardened 1.0 and 1.2 for dispatch after GPT
+review and carried its findings into 1.1. The November 4 central blank line
+remover spec was retired in favor of 1.2.
 
 After approval, open one GitHub issue per dispatched spec, use
-`task/1-<minor>-<slug>`, commit each gate, append its worklog, and open a PR with
-`Closes #N`. Run from current main. These documents remain in-repo and iterate;
+`task/1-<minor>-<slug>`, commit each gate, append its worklog, and, after operator
+review of the local branch, open a PR with `Closes #N`. Run from current main. These documents remain in-repo and iterate;
 historical central specs remain untouched. Dispatch does not implicitly authorize
 workflow changes, publication, or merges beyond the operator's stated scope.
 
 The closeout worklog records the current branch repair and dependency exceptions.
 Spec 1.0 precedes new functionality because outstanding upstream fixes cross major
-versions. Specs 1.2 and 1.3 can run independently after 1.1 lands. Spec 1.4 packages
-their final output. Preserve existing tool routes throughout; multifunction pages
+versions. Spec 1.2 runs next, on the current shell (operator decision, 2026-11-15);
+spec 1.1 then restyles it with every other tool. Spec 1.3 follows 1.1 because it
+adopts Sentinel patterns from 1.1's pinned baseline. Spec 1.4 packages their final
+output and waits on the operator's decision whether Ops Toolbox gets connected
+tools at all. Preserve existing tool routes throughout; multifunction pages
 are a direction for useful consolidation, not an instruction to rewrite all tools.
 
 ## Design decisions carried forward
