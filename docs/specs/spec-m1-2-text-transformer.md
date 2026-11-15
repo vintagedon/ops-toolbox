@@ -2,8 +2,8 @@
 title: "1.2 Text Transformer"
 description: "Ordered local text transformations with preview, reversible application, and a zero-click blank-line default"
 date: "2026-11-15"
-version: "0.3"
-status: "active"
+version: "0.6"
+status: "under-review"
 tags:
   - type: specification
   - domain: data
@@ -19,6 +19,12 @@ related_documents:
 v0.1 (GPT, 2026-11-14) set the interaction model. v0.2 (Claude, 2026-11-15, triad review) adds the blank-character definition, verified fixtures, the zero-click default, frozen registry fields, scope and closeout. The interaction model is unchanged.
 
 v0.3 (Claude, 2026-11-15, dispatch preflight) replaces the `node:22-alpine` container with the npx Node 22 / npm 12.0.2 toolchain, because the run account has no Docker access (SD-435). Scope is unchanged.
+
+v0.4 (Claude, 2026-11-15, review of the 1.2.1 to 1.2.4 run) resolves the executor's scope stop and one review finding, through gate 1.2.5. Modify gains `src/pages/About.jsx` line 21, the tool count the v0.3 grep never inspected (SD-436). The workspace now pins how Input edits and pastes treat a uniform CRLF or CR source; the browser reports textarea text with LF, so v0.3 code silently converted an imported CRLF file to LF on the first keystroke (SD-437). Frozen semantics, fixtures and registry fields are unchanged.
+
+v0.5 (Claude, 2026-11-15, PR #16 review) carries two findings from the Codex PR review, both reproduced by Claude, through gate 1.2.6. Find / replace re-serialized and re-parsed the whole text, so one empty unterminated line became zero lines even when nothing matched (` ` with Trim, a non-matching replace and Prefix `>` gave empty output instead of `>`), breaking the constraint that an operation leaves text it does not touch alone. Replace now works within each line. A paste placed anywhere but the end moved the caret to the end of Input; the caret now follows the pasted text. Fixtures F1 to F12 and the other operations are unchanged.
+
+v0.6 (Claude, 2026-11-15, executor stop on gate 1.2.6) resolves a contradiction v0.5 introduced (SD-438): v0.5 made search text containing LF invalid yet required every existing Find / replace test to pass, and the gate 1.2.1 test *replaces literal line breaks across lines* asserts a cross-line match. That ability is unreachable from the workspace, whose Find field is a single-line input, so v0.5 supersedes it: the test is rewritten to assert rejection. v0.6 also adds Kilo's PR #16 suggestion: the validation-error return reports `mixed` from the untouched input instead of `false`.
 
 ## Objective
 
@@ -55,6 +61,7 @@ Prior findings here (paths, line numbers, counts) were observed at `main` = `75b
 - `src/tools/TextTransformer.jsx` (new) and `tests/tools/TextTransformer.test.jsx` (new); helper components or a worker module beside it if needed
 - `src/lib/toolRegistry.js`: one entry. `src/App.jsx`: one lazy import. `src/components/DirectoryGrid.jsx`: the lucide import list and `ICONS` map only
 - `tests/lib/toolRegistry.test.js`: the four `24` occurrences (lines 14, 16, 110, 111) become `25`
+- `src/pages/About.jsx`: the tool count on line 21 only (v0.4)
 - `scripts/generate-meta.mjs`: the count in `SUMMARY` only
 - `README.md`: counts on lines 4, 19, 72, 84 and 225, `Tool 24` in the line-206 diagram, `### Data (5)` heading plus one row
 - `AGENTS.md`: counts on lines 10, 45 and 146
@@ -96,7 +103,7 @@ Prior findings here (paths, line numbers, counts) were observed at `main` = `75b
 | Sort lines | Unicode code-point order; reverse option. |
 | Uppercase / lowercase | `toUpperCase` / `toLowerCase`, labelled as locale-independent. |
 | Prefix / suffix | Literal text added to every line. |
-| Find / replace | Literal, all matches, explicit case sensitivity. Empty search text is invalid. Case-insensitive replace leaves unmatched spans byte-identical. |
+| Find / replace | Literal, all matches within each line, explicit case sensitivity. Empty search text is invalid, and so are search or replacement text containing CR or LF. Case-insensitive replace leaves unmatched spans byte-identical. The line model (line count, terminator style, terminal-newline flag) passes through unchanged (v0.5). |
 
 No regex or arbitrary code execution in this release.
 
@@ -155,7 +162,7 @@ Build `src/lib/textTransform.js`: the line model, the operation descriptors abov
 
 ### Gate 1.2.2: Workspace
 
-Register the tool and build the page. Interaction is v0.1's: Input is the editable source; Preview evaluates enabled operations in visible order without mutating Input; add, remove, reorder (keyboard-operable buttons), disable and repeat operations. **Apply** replaces Input with Preview, stores the prior input for undo, and clears the applied operation list. **Undo Apply** restores input and list; keep at most ten snapshots. **Restore original** restores the last imported or pasted baseline, confirming first if edits would be lost; editing Input does not change the baseline. Counters show lines and characters before and after.
+Register the tool and build the page. Interaction is v0.1's: Input is the editable source; Preview evaluates enabled operations in visible order without mutating Input; add, remove, reorder (keyboard-operable buttons), disable and repeat operations. **Apply** replaces Input with Preview, stores the prior input for undo, and clears the applied operation list. **Undo Apply** restores input and list; keep at most ten snapshots. **Restore original** restores the last imported or pasted baseline, confirming first if edits would be lost; editing Input does not change the baseline. **Edits keep a uniform style (v0.4):** a textarea reports its text with LF only, so when the current source's terminators are uniformly CRLF or uniformly CR, every LF in edited or pasted Input text is converted back to that style before it becomes the source. A mixed or LF source keeps the browser's LF, and the mixed-ending notice still applies. **A paste leaves the caret after the pasted text (v0.5),** wherever it was inserted. Counters show lines and characters before and after.
 
 Files: accept up to 2 MiB, reject invalid UTF-8 and NUL-containing input with an explanation and the prior state intact. Strip one leading UTF-8 BOM on import and restore it on download. Download a new `.txt`; never overwrite. Copy and Download act on the current preview only and are disabled while preview is stale or invalid. Use `useDebouncedValue` and `CopyButton`/`useClipboard`. No content in `localStorage`. If measured preview work on the F2 text repeated to 2 MiB exceeds 100 ms on ml01a, move evaluation to a worker. Never truncate preview or output.
 
@@ -214,6 +221,40 @@ Follow "Executing a Work Spec" in `AGENTS.md`. Branch `task/1-2-text-transformer
 - [ ] Nothing was pushed: `git ls-remote origin task/1-2-text-transformer` returns nothing.
 - [ ] The worklog records base commit, gate SHAs, mutation results, timing and worker decision, toolchain versions, the remaining-`24` list and the PR body, and is sealed.
 
+### Gate 1.2.5: Review amendments (v0.4)
+
+Make the two v0.4 changes on the existing branch, after the 1.2.4 commit: About's count, and edits that keep a uniform CRLF or CR style. Nothing else changes; frozen semantics, fixtures, registry fields and every do-not-touch item stand.
+
+**Validation:**
+
+- [ ] `src/pages/About.jsx` line 21 says `{25}`; `git diff` of About shows that line only. The gate 1.2.3 grep, extended with `src/pages/About.jsx`, returns no tool-count `24`.
+- [ ] Component test: import the F4 input as a file without a BOM, place the caret at the end of Input, type `c`, wait for the debounce; Download produces exactly `a\r\n\r\nb\r\nc` (the default Collapse pipeline).
+- [ ] Component test: import the F5 input (`a\r\rb`) as a file, type `c` at the end; Download produces exactly `a\r\rbc`.
+- [ ] Component test: after importing the F4 input, paste `x\ny` at the end of Input; every terminator in the resulting source is CRLF, and the new baseline is that CRLF text.
+- [ ] Component test: after importing the F12 input (mixed), typing keeps LF output and the mixed-ending notice.
+- [ ] Mutation M5: remove the style restoration from the edit path in a scratch copy; at least the F4-edit test fails. Restore it byte for byte.
+- [ ] Playwright (Python, as gate 1.2.3): import the F4 input file on `/text-transformer`, type one character at the end of Input, download; the bytes equal `a\r\n\r\nb\r\n` plus that character.
+- [ ] Under Node 22 and npm 12.0.2 through the npx toolchain, a clean checkout of the gate commit passes `npm ci`, `npm run test` and `npm run build`.
+- [ ] The worklog gains a 1.2.5 section (amendment authority, changes, test and mutation results, browser bytes) and is re-sealed with status complete; the proposed PR body still carries `Closes #12`. This spec's status becomes `under-review`.
+- [ ] `git log main..HEAD` shows the four earlier commits plus one 1.2.5 commit; nothing was pushed.
+
+### Gate 1.2.6: PR review fixes (v0.5)
+
+Make the two v0.5 changes on the existing branch, after the 1.2.5 commit: per-line Find / replace that preserves the line model, and the caret after a paste. Nothing else changes.
+
+**Validation:**
+
+- [ ] Unit tests in `tests/lib/textTransform.test.js`, each with Collapse removed from the pipeline: R1 input ` ` with Trim, Find `x` / replace `y`, Prefix `>` gives `>`. R2 input ` \n ` with the same pipeline gives `>\n>`. R3 input `a\r\nXa\r\n` with case-insensitive Find `x` / replace `y` gives `a\r\nya\r\n`. R4 a search text containing LF, and R5 a replacement containing CR, each leave the input unchanged with a validation error.
+- [ ] Every existing fixture and Find / replace test still passes, including the literal `$&` replacement, except *replaces literal line breaks across lines* (gate 1.2.1), which v0.5 supersedes: rewrite it to assert that a search containing LF leaves the input unchanged with a validation error (it may become R4).
+- [ ] The validation-error return of `transformText` reports `mixed` from the untouched input; a unit test with the F12 input and an invalid operation asserts `mixed: true` and the input unchanged (v0.6, Kilo PR #16).
+- [ ] Mutation M6: restore the serialize-and-reparse replacement in a scratch copy; at least R1 and R2 fail. Restore byte for byte.
+- [ ] Component test: Input `abc`, caret at offset 1, paste `XY`; after render the selection is collapsed at 3, and typing `z` gives `aXYzbc`.
+- [ ] Mutation M7: remove the caret restoration in a scratch copy; the paste-caret test fails. Restore byte for byte.
+- [ ] Playwright (Python, as gate 1.2.3): on `/text-transformer`, the same paste-caret check passes in Chromium, and the gate 1.2.5 CRLF byte check still passes.
+- [ ] Under Node 22 and npm 12.0.2 through the npx toolchain, a clean checkout of the gate commit passes `npm ci`, `npm run test` and `npm run build`.
+- [ ] The worklog gains a 1.2.6 section and is re-sealed complete; the PR body section in the worklog is updated. This spec's status becomes `under-review`.
+- [ ] Since `c6ad15e`, `git log` shows the 1.2.6 stop record (`e14e34f`), the v0.6 amendment, and exactly one 1.2.6 implementation commit; nothing was pushed.
+
 ## Constraints
 
 - **Do not use `trim()` or a bare `\s` test for blank lines or trimming.** Both miss zero-width characters, the reason this tool exists. M1 proves it.
@@ -235,5 +276,23 @@ Frozen: the line model, the blank set, every operation's semantics, the default 
 2. 1.2.2 workspace
 3. 1.2.3 counts, docs, qualification (toolchain and browser results are final only after 1.2.2)
 4. 1.2.4 closeout
+5. 1.2.5 review amendments (v0.4), then re-seal
+6. 1.2.6 PR review fixes (v0.5), then re-seal
 
 No batch renaming, multi-file editing, automatic saving or online processing in this release.
+
+
+## Execution status amendment (2026-11-15)
+
+Issue #12, local branch `task/1-2-text-transformer`: gates 1.2.1 through 1.2.3
+are implemented and qualified. Closeout stopped under the invalidated-assumption
+rule after the broader repository count audit found `src/pages/About.jsx:21`
+hard-codes `{24}`. That path is outside Modify, while Objective requires every
+tool-count claim to say 25 except the named visual assets and alt text. The
+specified seven-file count grep does not inspect About. No fixture, semantics,
+registry field or scope has been changed to hide this conflict.
+
+Proposed amendment requiring operator authorization: add `src/pages/About.jsx`
+to Modify for the sole `{24}` to `{25}` count correction. The file remains
+unchanged. See `work-logs/worklog-2026-11-15-text-transformer.md` for evidence,
+local gate commits and the held proposed PR body. No publication or acceptance.

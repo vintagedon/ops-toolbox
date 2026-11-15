@@ -18,7 +18,7 @@ export default function About() {
 
       <div className="space-y-4 text-sm text-text-secondary leading-relaxed">
         <p>
-          Ops Toolbox is a collection of {24} small utilities for IT operations and platform
+          Ops Toolbox is a collection of {25} small utilities for IT operations and platform
           engineering — network math, security parsing, data conversion, and developer helpers.
           Every tool runs entirely in the browser. There is no server, no API, and nothing leaves
           your device.

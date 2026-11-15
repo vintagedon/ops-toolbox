@@ -18,7 +18,7 @@ const ORIGIN = 'https://opstoolbox.dev';
 
 // Hand-written constants (not registry-derived).
 const TITLE = 'Ops Toolbox';
-const SUMMARY = '24 client-side IT operations and developer utilities. 100% in-browser processing — no servers, no tracking, no data leaves the browser.';
+const SUMMARY = '25 client-side IT operations and developer utilities. 100% in-browser processing — no servers, no tracking, no data leaves the browser.';
 const GITHUB_URL = 'https://github.com/radioastronomyio/ops-toolbox';
 const ABOUT_PATH = 'about';
 

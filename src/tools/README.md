@@ -37,6 +37,7 @@ Tools are lazy-loaded via `React.lazy()` in `App.jsx` — only the visited tool'
 | `JsonDiff.jsx` | JSON Diff | Data |
 | `CsvToJson.jsx` | CSV to JSON | Data |
 | `SqlFormatter.jsx` | SQL Formatter | Data |
+| `TextTransformer.jsx` | Text Transformer | Data |
 | `mermaid-renderer/` | Mermaid Renderer | Developer |
 | `UrlParser.jsx` | URL Parser | Developer |
 | `UserAgentDecoder.jsx` | User-Agent Decoder | Developer |

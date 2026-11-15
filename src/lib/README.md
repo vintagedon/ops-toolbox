@@ -29,6 +29,7 @@ Pure utility functions with zero React dependencies. Each module exports functio
 | `epochUtils.js` | Unix epoch ↔ human date conversion with timezone support |
 | `csvToJson.js` | CSV parsing wrapper (PapaParse) with delimiter detection |
 | `url-parser.js` | URL component extraction via native URL API |
+| `textTransform.js` | Ordered text pipeline, Unicode blank handling and line-ending metadata |
 | `base64.js` | Base64 encode/decode with Unicode handling |
 | `asciiBanner.js` | ASCII art generation via figlet |
 | `bcryptUtils.js` | Bcrypt hash and verify (bcryptjs) |

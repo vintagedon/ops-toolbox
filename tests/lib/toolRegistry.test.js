@@ -11,9 +11,9 @@ import {
 import * as lucide from 'lucide-react';
 
 describe('toolRegistry', () => {
-  it('exports an array of 24 tools', () => {
+  it('exports an array of 25 tools', () => {
     expect(Array.isArray(toolRegistry)).toBe(true);
-    expect(toolRegistry).toHaveLength(24);
+    expect(toolRegistry).toHaveLength(25);
   });
 
   it('every tool has required fields: id, name, description, path, category, componentPath', () => {
@@ -107,8 +107,8 @@ describe('getToolByPath', () => {
 });
 
 describe('getToolCount', () => {
-  it('returns 24', () => {
-    expect(getToolCount()).toBe(24);
+  it('returns 25', () => {
+    expect(getToolCount()).toBe(25);
   });
 });
 

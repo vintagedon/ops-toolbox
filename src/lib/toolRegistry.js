@@ -173,6 +173,18 @@ export const toolRegistry = [
     status: 'stable',
   },
   {
+    id: 'text-transformer',
+    name: 'Text Transformer',
+    description: 'Clean up pasted text with ordered operations: collapse or remove blank lines, trim, dedupe, sort, change case, and find and replace.',
+    path: 'text-transformer',
+    category: 'Data',
+    icon: 'ListFilter',
+    componentPath: './tools/TextTransformer',
+    processingMode: 'local',
+    offlineCapable: true,
+    status: 'stable',
+  },
+  {
     id: 'mermaid-renderer',
     name: 'Mermaid Renderer',
     description: 'Paste mermaid diagram code and get rendered SVG with ELK layout engine.',
