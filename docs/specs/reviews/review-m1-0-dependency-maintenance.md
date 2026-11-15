@@ -39,12 +39,12 @@ Vite's baseline audit also names GHSA-v6wh-96g9-6wx3,
 GHSA-698v-4r3x-3vcv, GHSA-r825-w8mm-5pxw, GHSA-587h-7wmj-h5pm,
 GHSA-9jrq-w75r-8gcw, GHSA-rq7h-c2jc-7f22 and GHSA-fx2h-pf6j-xcff.
 No override, resolution, forced audit repair or finding suppression was used.
-Package/lockfile evidence is in `package.json:22`, `:35`, `:40`, `:50`, `:55`
+Package/lockfile evidence is in `package.json:22`, `:34`, `:40`, `:50`, `:55`
 and `package-lock.json` (matching node_modules package records).
 
 Prior applicability assessments remain context rather than waivers: this app
 ships static files, not the dev server; Router navigation comes from the registry,
-with BrowserRouter and no SSR hydration (`src/App.jsx:10`, `:62`); no prerequisite
+with BrowserRouter and no SSR hydration (`src/App.jsx:10`, `:56`); no prerequisite
 prototype-pollution path was established for the old KaTeX finding. All seven
 packages are now repaired or removed regardless of applicability.
 

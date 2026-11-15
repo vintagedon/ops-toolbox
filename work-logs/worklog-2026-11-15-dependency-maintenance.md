@@ -2,13 +2,13 @@
 title: "Worklog — 1.0 Dependency maintenance"
 description: "Local execution and validation of dependency upgrades for issue 11"
 spec: "docs/specs/spec-m1-0-dependency-maintenance.md"
-status: "in-progress"
+status: "partial"
 started: "2026-11-15T13:29:12Z"
-finished: ""
+finished: "2026-11-15T13:47:00Z"
 executor:
   model: "unreported"
   runtime: "codex-cli 0.163.0"
-  duration: "in progress"
+  duration: "1068 seconds to seal"
 git:
   repo: "/opt/agents/repos/ops-toolbox-task-1-0"
   branch: "task/1-0-dependency-maintenance"
@@ -277,3 +277,150 @@ unchanged Markdown test SHA-256
 This checkpoint is amended into the same gate commit; the final gate commit is
 checked in another clean worktree before closeout. Local release checks PASS;
 Docker and upstream workflow-metadata checks remain explicitly UNAVAILABLE.
+
+
+## Gate 1.0.6 — Closeout and sealed handoff
+
+Final release gate commit **`a47d695`** was tested from clean
+`/tmp/ops10-gate5-final`, Node **v22.23.5** / npm **12.0.2**: `npm ci` **2.56 s**;
+**554 tests / 64 files** (**6.74 s**), build **1.23 s**, **26 prerendered routes**;
+fresh audit **0** in every severity (exit 0). The exact final gate commit's fresh
+browser context passes **27 paths** and back/forward, **0 page exceptions** and
+**0 external requests**. All request origins other than the loopback preview are
+aborted/logged; that log is empty. No further package or source edits follow.
+
+### Gate validation disposition
+
+| Gate | Local result | Final gate commit / evidence |
+|---|---|---|
+| 1.0.1 | PASS | `9de1dfc`: inventory, peer ranges, baseline 550 / 63, audit 7 |
+| 1.0.2 | PASS | `eb94783`: clean install, 550 / 63, patched single Vite, no esbuild, baseline deprecations absent |
+| 1.0.3 | PASS | `54c83cc`: 550 / 63; 27 direct paths, back/forward, patched Router |
+| 1.0.4 | PASS | `d3894ab`: 554 / 64; strict mutation 4 failures, restoration and unchanged Markdown cases pass; layout/math/exports/security fixtures pass |
+| 1.0.5 | Local release checks PASS; evidence limits explicit | `a47d695`: 554 / 64, audit 0, 27 paths with no external requests; Docker D1 and upstream action declarations UNAVAILABLE |
+| 1.0.6 | Local closeout sealed for review | This gate's commit; six reachable gate commits, proposed PR below, no publication |
+
+Status is **partial**, sealed: all bounded dependency repairs and local runtime
+checks succeeded, but the full upstream action-declaration proof cannot be met
+under the explicit network restriction. Docker is separately unavailable by
+spec design. No acceptance is inferred from successful process exits. This is
+the clean local handoff boundary: Claude reviews this branch before anything is
+pushed; Don decides D1 and W1–W3. The spec status is under-review, not accepted.
+No failed upgrade or reverted gate exists. Intermediate candidate checkpoints
+were amended locally only to add evidence; final gate commits were each rerun
+from clean worktrees and are the five hashes listed above.
+
+Before closeout, `git log main..HEAD` showed exactly those five gate commits;
+this closeout adds the sixth. `git merge-base main HEAD` and local main remain
+**`73bd13fb1e03a44983a6d30ff287adaef2aa1e15`**. No remote query was made: the
+spec's `git ls-remote` validation is **NOT RUN** under registry-only networking.
+No push was attempted, no GitHub action was taken, and the primary checkout was
+not switched or edited. The launcher also disables push; no bypass was attempted.
+
+Scope check: only the eleven allowed deliverable paths (including the spec status
+and execution amendment); no repository file deletions; AGENTS only lines 12/16;
+CLAUDE/REVIEW variants, workflow, Dockerfile, source, Vite config and other specs
+unchanged. No auth/token stores or secret environment values were read. No global
+configuration change, additional agent, model switch or browser download occurred.
+No central lifecycle write is included because the dispatch's Modify list takes
+precedence. No recycle/move/collision operation was needed.
+
+### Route evidence (baseline and final headings match)
+
+| Direct path | Primary h1 |
+|---|---|
+| `/` | Client-Side Developer Utilities |
+| `/subnet-calculator` | Subnet Calculator |
+| `/cidr-expander` | CIDR Range Expander |
+| `/jwt-decoder` | JWT Decoder |
+| `/password-generator` | Password Generator |
+| `/ssh-keygen` | SSH Keypair Generator |
+| `/x509-parser` | X.509 Certificate Parser |
+| `/file-hash-calculator` | File Hash Calculator |
+| `/bcrypt-hash-verifier` | Bcrypt Hash Verifier |
+| `/json-yaml` | JSON ↔ YAML Converter |
+| `/base64` | Base64 Codec |
+| `/json-diff` | JSON Diff |
+| `/csv-to-json` | CSV to JSON |
+| `/sql-formatter` | SQL Formatter |
+| `/mermaid-renderer` | Mermaid Renderer |
+| `/url-parser` | URL Parser |
+| `/useragent-decoder` | User-Agent Decoder |
+| `/chmod-calculator` | Chmod Calculator |
+| `/url-encoder` | URL Query Encoder |
+| `/cron-parser` | Cron Parser |
+| `/regex-tester` | Regex Tester |
+| `/ascii-banner` | ASCII Banner |
+| `/uuid-generator` | UUID Generator |
+| `/epoch-time` | Unix Epoch Tool |
+| `/markdown-previewer` | Markdown Previewer |
+| `/about` | About Ops Toolbox |
+| `/no-such-tool` | 404 |
+
+Each direct response was HTTP 200, including the SPA fallback for the unknown
+path; its rendered result is the 404 view. History proof uses the app's own links
+through the directory between Subnet Calculator and CIDR Range Expander, then
+Back twice / Forward twice and heading checks after restoration.
+
+### Reproduction and evidence retention
+
+For each gate, use a disposable detached worktree at its commit, record versions,
+and run the following with Node 22 / npm 12.0.2. Remove the scratch worktree with
+`git worktree remove --force <scratch>` afterwards (only run-owned scratch).
+
+```sh
+git worktree add --detach /tmp/ops10-recheck <gate-commit>
+cd /tmp/ops10-recheck
+npx -y -p node@22 -p npm@12.0.2 -- node -v
+npx -y -p node@22 -p npm@12.0.2 -- npm -v
+npx -y -p node@22 -p npm@12.0.2 -- npm ci
+npx -y -p node@22 -p npm@12.0.2 -- npm ls vite esbuild react-router react-router-dom mermaid katex @mermaid-js/layout-elk --all
+npx -y -p node@22 -p npm@12.0.2 -- npm run test
+npx -y -p node@22 -p npm@12.0.2 -- npm run build
+npx -y -p node@22 -p npm@12.0.2 -- npm audit --json
+```
+
+Browser checks use `npm run preview -- --host 127.0.0.1 --port <local-port>
+--strictPort` under that same toolchain. Scratch Playwright is `/tmp/pw-1-0`,
+version 1.64.1; `PLAYWRIGHT_BROWSERS_PATH=/opt/agents/data-storage-write/playwright-browsers`.
+The route harness imports each clean checkout's canonical registry, compares h1s
+to baseline, rejects nonlocal requests and checks actual browser history. Mermaid
+harness uses manual editor mode, waits for new SVG IDs after each render, decodes
+both downloaded files, and checks dialog/onerror behavior. Mutation edits only
+the scratch config in a try/finally and restores byte-exact source.
+
+Commands, outputs, browser harnesses, exported images and supplementary JSON live
+in `/tmp/ops10-evidence` and `/tmp/pw-1-0` (**ml01a-local, disposable scratch**),
+not durable repository evidence. All relevant versions, hashes, counts, headings,
+fixtures, mutation failure and verdicts are recorded inline here. Scratch preview
+processes are stopped and run-owned Git worktrees removed at handoff; raw logs
+may remain temporarily for the reviewer. No dependency was added for browser QA.
+
+### Proposed pull request (not published)
+
+Title: `fix: qualify dependency upgrades and record release review`
+
+```markdown
+Repair the remaining seven advisory package entries by upgrading Vite/React
+plugin, React Router, and Mermaid/ELK together within their supported ranges.
+Keep React 18, Tailwind 3, BrowserRouter, lazy tool routes, and application source
+unchanged. Add strict Mermaid regression cases for all supported settings.
+
+Validation: clean gate-commit installs on Node v22.23.5 / npm 12.0.2; 554 tests
+in 64 files; production build with 26 prerendered routes; audit zero in every
+severity. Playwright 1.64.1 covers 24 tools, home/about/not-found, browser history,
+Dagre/ELK/math, valid SVG/PNG exports and malicious fixtures with no dialogs or
+onerror attributes. Loose-mode mutation fails all four security cases.
+
+Review: docs/specs/reviews/review-m1-0-dependency-maintenance.md.
+Docker D1 is UNAVAILABLE, not passed; workflow proposals W1–W3 are documentation
+only. Live upstream action declarations remain unverified under the run's
+registry-only network restriction. No workflow or Dockerfile changed.
+
+Closes #11
+```
+
+No PR was opened or updated; hosted CI was not run. No further spec is dispatched.
+The next action is Claude's local-branch review and Don's operator decisions.
+
+**SEALED 2026-11-15T13:47:00Z** — 1068 seconds from observed start to seal; actual host `ml01a`. Runtime exact model identifier unreported; CLI `codex-cli 0.163.0`. Final commit is the unique local commit with gate `(1.0.6)` in its subject; its SHA is reported at handoff to avoid self-referential content.
