@@ -2,6 +2,7 @@
 title: "1.4 Full and air-gapped releases"
 description: "One source tree with explicit connected capabilities and offline distributions"
 date: "2026-11-14"
+version: "0.2"
 status: "draft"
 tags:
   - type: specification
@@ -13,14 +14,15 @@ tags:
 ## Outcome
 
 Produce two independently verified builds from one source commit and lockfile.
-The full edition contains local tools plus a proposed DNS Lookup workspace. The
+The full edition contains local tools plus a DNS Lookup workspace (accepted by the
+operator 2026-11-15 05:07 as the first connected tool). The
 air-gapped edition contains only tools with local processing and offline support,
 including cloud subnet planning. A local-only filter in the full edition remains
 a browsing aid, not a network enforcement switch.
 
 ## Connected-tool contract
 
-DNS Lookup is the proposed first connected tool: user-entered domain and A, AAAA,
+DNS Lookup is the first connected tool: user-entered domain and A, AAAA,
 CNAME, MX, NS or TXT query, explicit **Look up** action, response/status table and
 copy/export. Use Cloudflare's documented browser-compatible DNS-over-HTTPS JSON
 endpoint after verifying its current CORS behavior and terms at gate 1. Show the
