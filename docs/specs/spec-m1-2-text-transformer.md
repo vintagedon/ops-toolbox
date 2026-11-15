@@ -2,8 +2,8 @@
 title: "1.2 Text Transformer"
 description: "Ordered local text transformations with preview, reversible application, and a zero-click blank-line default"
 date: "2026-11-15"
-version: "0.4"
-status: "under-review"
+version: "0.5"
+status: "active"
 tags:
   - type: specification
   - domain: data
@@ -21,6 +21,8 @@ v0.1 (GPT, 2026-11-14) set the interaction model. v0.2 (Claude, 2026-11-15, tria
 v0.3 (Claude, 2026-11-15, dispatch preflight) replaces the `node:22-alpine` container with the npx Node 22 / npm 12.0.2 toolchain, because the run account has no Docker access (SD-435). Scope is unchanged.
 
 v0.4 (Claude, 2026-11-15, review of the 1.2.1 to 1.2.4 run) resolves the executor's scope stop and one review finding, through gate 1.2.5. Modify gains `src/pages/About.jsx` line 21, the tool count the v0.3 grep never inspected (SD-436). The workspace now pins how Input edits and pastes treat a uniform CRLF or CR source; the browser reports textarea text with LF, so v0.3 code silently converted an imported CRLF file to LF on the first keystroke (SD-437). Frozen semantics, fixtures and registry fields are unchanged.
+
+v0.5 (Claude, 2026-11-15, PR #16 review) carries two findings from the Codex PR review, both reproduced by Claude, through gate 1.2.6. Find / replace re-serialized and re-parsed the whole text, so one empty unterminated line became zero lines even when nothing matched (` ` with Trim, a non-matching replace and Prefix `>` gave empty output instead of `>`), breaking the constraint that an operation leaves text it does not touch alone. Replace now works within each line. A paste placed anywhere but the end moved the caret to the end of Input; the caret now follows the pasted text. Fixtures F1 to F12 and the other operations are unchanged.
 
 ## Objective
 
@@ -99,7 +101,7 @@ Prior findings here (paths, line numbers, counts) were observed at `main` = `75b
 | Sort lines | Unicode code-point order; reverse option. |
 | Uppercase / lowercase | `toUpperCase` / `toLowerCase`, labelled as locale-independent. |
 | Prefix / suffix | Literal text added to every line. |
-| Find / replace | Literal, all matches, explicit case sensitivity. Empty search text is invalid. Case-insensitive replace leaves unmatched spans byte-identical. |
+| Find / replace | Literal, all matches within each line, explicit case sensitivity. Empty search text is invalid, and so are search or replacement text containing CR or LF. Case-insensitive replace leaves unmatched spans byte-identical. The line model (line count, terminator style, terminal-newline flag) passes through unchanged (v0.5). |
 
 No regex or arbitrary code execution in this release.
 
@@ -158,7 +160,7 @@ Build `src/lib/textTransform.js`: the line model, the operation descriptors abov
 
 ### Gate 1.2.2: Workspace
 
-Register the tool and build the page. Interaction is v0.1's: Input is the editable source; Preview evaluates enabled operations in visible order without mutating Input; add, remove, reorder (keyboard-operable buttons), disable and repeat operations. **Apply** replaces Input with Preview, stores the prior input for undo, and clears the applied operation list. **Undo Apply** restores input and list; keep at most ten snapshots. **Restore original** restores the last imported or pasted baseline, confirming first if edits would be lost; editing Input does not change the baseline. **Edits keep a uniform style (v0.4):** a textarea reports its text with LF only, so when the current source's terminators are uniformly CRLF or uniformly CR, every LF in edited or pasted Input text is converted back to that style before it becomes the source. A mixed or LF source keeps the browser's LF, and the mixed-ending notice still applies. Counters show lines and characters before and after.
+Register the tool and build the page. Interaction is v0.1's: Input is the editable source; Preview evaluates enabled operations in visible order without mutating Input; add, remove, reorder (keyboard-operable buttons), disable and repeat operations. **Apply** replaces Input with Preview, stores the prior input for undo, and clears the applied operation list. **Undo Apply** restores input and list; keep at most ten snapshots. **Restore original** restores the last imported or pasted baseline, confirming first if edits would be lost; editing Input does not change the baseline. **Edits keep a uniform style (v0.4):** a textarea reports its text with LF only, so when the current source's terminators are uniformly CRLF or uniformly CR, every LF in edited or pasted Input text is converted back to that style before it becomes the source. A mixed or LF source keeps the browser's LF, and the mixed-ending notice still applies. **A paste leaves the caret after the pasted text (v0.5),** wherever it was inserted. Counters show lines and characters before and after.
 
 Files: accept up to 2 MiB, reject invalid UTF-8 and NUL-containing input with an explanation and the prior state intact. Strip one leading UTF-8 BOM on import and restore it on download. Download a new `.txt`; never overwrite. Copy and Download act on the current preview only and are disabled while preview is stale or invalid. Use `useDebouncedValue` and `CopyButton`/`useClipboard`. No content in `localStorage`. If measured preview work on the F2 text repeated to 2 MiB exceeds 100 ms on ml01a, move evaluation to a worker. Never truncate preview or output.
 
@@ -234,6 +236,22 @@ Make the two v0.4 changes on the existing branch, after the 1.2.4 commit: About'
 - [ ] The worklog gains a 1.2.5 section (amendment authority, changes, test and mutation results, browser bytes) and is re-sealed with status complete; the proposed PR body still carries `Closes #12`. This spec's status becomes `under-review`.
 - [ ] `git log main..HEAD` shows the four earlier commits plus one 1.2.5 commit; nothing was pushed.
 
+### Gate 1.2.6: PR review fixes (v0.5)
+
+Make the two v0.5 changes on the existing branch, after the 1.2.5 commit: per-line Find / replace that preserves the line model, and the caret after a paste. Nothing else changes.
+
+**Validation:**
+
+- [ ] Unit tests in `tests/lib/textTransform.test.js`, each with Collapse removed from the pipeline: R1 input ` ` with Trim, Find `x` / replace `y`, Prefix `>` gives `>`. R2 input ` \n ` with the same pipeline gives `>\n>`. R3 input `a\r\nXa\r\n` with case-insensitive Find `x` / replace `y` gives `a\r\nya\r\n`. R4 a search text containing LF, and R5 a replacement containing CR, each leave the input unchanged with a validation error.
+- [ ] Every existing fixture and Find / replace test still passes, including the literal `$&` replacement.
+- [ ] Mutation M6: restore the serialize-and-reparse replacement in a scratch copy; at least R1 and R2 fail. Restore byte for byte.
+- [ ] Component test: Input `abc`, caret at offset 1, paste `XY`; after render the selection is collapsed at 3, and typing `z` gives `aXYzbc`.
+- [ ] Mutation M7: remove the caret restoration in a scratch copy; the paste-caret test fails. Restore byte for byte.
+- [ ] Playwright (Python, as gate 1.2.3): on `/text-transformer`, the same paste-caret check passes in Chromium, and the gate 1.2.5 CRLF byte check still passes.
+- [ ] Under Node 22 and npm 12.0.2 through the npx toolchain, a clean checkout of the gate commit passes `npm ci`, `npm run test` and `npm run build`.
+- [ ] The worklog gains a 1.2.6 section and is re-sealed complete; the PR body section in the worklog is updated. This spec's status becomes `under-review`.
+- [ ] `git log main..HEAD` gains exactly one 1.2.6 commit; nothing was pushed.
+
 ## Constraints
 
 - **Do not use `trim()` or a bare `\s` test for blank lines or trimming.** Both miss zero-width characters, the reason this tool exists. M1 proves it.
@@ -256,6 +274,7 @@ Frozen: the line model, the blank set, every operation's semantics, the default 
 3. 1.2.3 counts, docs, qualification (toolchain and browser results are final only after 1.2.2)
 4. 1.2.4 closeout
 5. 1.2.5 review amendments (v0.4), then re-seal
+6. 1.2.6 PR review fixes (v0.5), then re-seal
 
 No batch renaming, multi-file editing, automatic saving or online processing in this release.
 
