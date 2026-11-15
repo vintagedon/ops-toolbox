@@ -2,7 +2,7 @@
 title: "1.2 Text Transformer"
 description: "Ordered local text transformations with preview, reversible application, and a zero-click blank-line default"
 date: "2026-11-15"
-version: "0.5"
+version: "0.6"
 status: "active"
 tags:
   - type: specification
@@ -23,6 +23,8 @@ v0.3 (Claude, 2026-11-15, dispatch preflight) replaces the `node:22-alpine` cont
 v0.4 (Claude, 2026-11-15, review of the 1.2.1 to 1.2.4 run) resolves the executor's scope stop and one review finding, through gate 1.2.5. Modify gains `src/pages/About.jsx` line 21, the tool count the v0.3 grep never inspected (SD-436). The workspace now pins how Input edits and pastes treat a uniform CRLF or CR source; the browser reports textarea text with LF, so v0.3 code silently converted an imported CRLF file to LF on the first keystroke (SD-437). Frozen semantics, fixtures and registry fields are unchanged.
 
 v0.5 (Claude, 2026-11-15, PR #16 review) carries two findings from the Codex PR review, both reproduced by Claude, through gate 1.2.6. Find / replace re-serialized and re-parsed the whole text, so one empty unterminated line became zero lines even when nothing matched (` ` with Trim, a non-matching replace and Prefix `>` gave empty output instead of `>`), breaking the constraint that an operation leaves text it does not touch alone. Replace now works within each line. A paste placed anywhere but the end moved the caret to the end of Input; the caret now follows the pasted text. Fixtures F1 to F12 and the other operations are unchanged.
+
+v0.6 (Claude, 2026-11-15, executor stop on gate 1.2.6) resolves a contradiction v0.5 introduced (SD-438): v0.5 made search text containing LF invalid yet required every existing Find / replace test to pass, and the gate 1.2.1 test *replaces literal line breaks across lines* asserts a cross-line match. That ability is unreachable from the workspace, whose Find field is a single-line input, so v0.5 supersedes it: the test is rewritten to assert rejection. v0.6 also adds Kilo's PR #16 suggestion: the validation-error return reports `mixed` from the untouched input instead of `false`.
 
 ## Objective
 
@@ -243,14 +245,15 @@ Make the two v0.5 changes on the existing branch, after the 1.2.5 commit: per-li
 **Validation:**
 
 - [ ] Unit tests in `tests/lib/textTransform.test.js`, each with Collapse removed from the pipeline: R1 input ` ` with Trim, Find `x` / replace `y`, Prefix `>` gives `>`. R2 input ` \n ` with the same pipeline gives `>\n>`. R3 input `a\r\nXa\r\n` with case-insensitive Find `x` / replace `y` gives `a\r\nya\r\n`. R4 a search text containing LF, and R5 a replacement containing CR, each leave the input unchanged with a validation error.
-- [ ] Every existing fixture and Find / replace test still passes, including the literal `$&` replacement.
+- [ ] Every existing fixture and Find / replace test still passes, including the literal `$&` replacement, except *replaces literal line breaks across lines* (gate 1.2.1), which v0.5 supersedes: rewrite it to assert that a search containing LF leaves the input unchanged with a validation error (it may become R4).
+- [ ] The validation-error return of `transformText` reports `mixed` from the untouched input; a unit test with the F12 input and an invalid operation asserts `mixed: true` and the input unchanged (v0.6, Kilo PR #16).
 - [ ] Mutation M6: restore the serialize-and-reparse replacement in a scratch copy; at least R1 and R2 fail. Restore byte for byte.
 - [ ] Component test: Input `abc`, caret at offset 1, paste `XY`; after render the selection is collapsed at 3, and typing `z` gives `aXYzbc`.
 - [ ] Mutation M7: remove the caret restoration in a scratch copy; the paste-caret test fails. Restore byte for byte.
 - [ ] Playwright (Python, as gate 1.2.3): on `/text-transformer`, the same paste-caret check passes in Chromium, and the gate 1.2.5 CRLF byte check still passes.
 - [ ] Under Node 22 and npm 12.0.2 through the npx toolchain, a clean checkout of the gate commit passes `npm ci`, `npm run test` and `npm run build`.
 - [ ] The worklog gains a 1.2.6 section and is re-sealed complete; the PR body section in the worklog is updated. This spec's status becomes `under-review`.
-- [ ] `git log main..HEAD` gains exactly one 1.2.6 commit; nothing was pushed.
+- [ ] Since `c6ad15e`, `git log` shows the 1.2.6 stop record (`e14e34f`), the v0.6 amendment, and exactly one 1.2.6 implementation commit; nothing was pushed.
 
 ## Constraints
 
