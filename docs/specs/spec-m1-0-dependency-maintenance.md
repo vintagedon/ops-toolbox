@@ -2,7 +2,7 @@
 title: "1.0 Dependency maintenance"
 description: "Qualify the remaining major dependency upgrades before feature work, and put residual advisories and workflow warnings in front of the operator"
 date: "2026-11-15"
-version: "0.2"
+version: "0.3"
 status: "review-ready"
 tags:
   - type: specification
@@ -18,6 +18,11 @@ related_documents:
 **Task 1.0 (#N, opened at dispatch).** Gates 1.0.1 to 1.0.6. Ends at an operator decision recorded in `docs/specs/reviews/review-m1-0-dependency-maintenance.md`. Spec 1.2 dispatches after this unit's PR merges.
 
 v0.1 (GPT, 2026-11-14) set scope and gates. v0.2 (Claude, 2026-11-15, triad review) adds the current audit snapshot, environment, scope lists, checkbox validations, the review surface and closeout. Scope is unchanged.
+
+v0.3 (GPT, 2026-11-15, triad review) corrects the strict-mode proof. Both malicious
+fixtures pass in loose mode on the locked Mermaid version: the app discards
+`bindFunctions`, and Mermaid sanitizes the HTML label in both modes. Keep those
+behavior checks, but prove the strict setting separately with a failing mutation.
 
 ## Objective
 
@@ -117,7 +122,14 @@ Upgrade `mermaid` and `@mermaid-js/layout-elk` together. Keep `securityLevel: 's
 
 - [ ] `npm ls mermaid katex @mermaid-js/layout-elk` shows only patched versions.
 - [ ] Playwright: the Mermaid Renderer renders one flowchart with the default layout and with ELK, renders a diagram containing KaTeX math, and exports SVG and PNG; each export opens as a valid file.
-- [ ] A Mermaid source containing `click A call alert(1)` and a node label containing `<img src=x onerror=alert(1)>` produce no dialog and no `onerror` attribute in the rendered SVG.
+- [ ] A regression test asserts `getMermaidConfig` returns `securityLevel: 'strict'`
+  for every supported theme/layout combination. In a scratch copy, changing that
+  setting to `loose` fails the test; record the failure and restore the source.
+- [ ] Render valid diagrams containing `click A call alert(1)` and a node label
+  containing `<img src=x onerror=alert(1)>`; click node A in the callback case.
+  Both produce no dialog and no `onerror` attribute in the rendered SVG. These are
+  behavior checks, not proof of the strict setting: both also passed with loose
+  mode during the review. Do not attach callbacks merely to make this test fail.
 - [ ] `tests/lib/markdownUtils.test.js` sanitization cases still pass unchanged.
 
 ### Gate 1.0.5: Release proof and review surface
