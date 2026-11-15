@@ -63,8 +63,31 @@ describe('pipeline contracts', () => {
   it('insensitive replace preserves unmatched spans byte for byte', () => {
     expect(run('MiXeD\u200B AbC abc! É', op('replace', { find: 'ABC', replacement: 'x', caseSensitive: false }))).toBe('MiXeD\u200B x x! É');
   });
-  it('replaces literal line breaks across lines', () => {
-    expect(run('a\nb\n', op('replace', { find: '\nb', replacement: '+' }))).toBe('a+\n');
+  it.each(['\n', '\r'])('R4 rejects a search containing %j instead of matching across lines', ending => {
+    const input = 'a\nb\n';
+    expect(transformText(input, [op('replace', { find: `${ending}b`, replacement: '+' })]))
+      .toMatchObject({ text: input, error: expect.any(String) });
+  });
+  it.each(['\r', '\n'])('R5 rejects a replacement containing %j atomically', ending => {
+    const input = ' a\r\nb\r\n';
+    expect(transformText(input, [op('trim'), op('replace', { find: 'a', replacement: ending })]))
+      .toMatchObject({ text: input, error: expect.any(String) });
+  });
+  it.each([
+    ['R1', ' ', '>'],
+    ['R2', ' \n ', '>\n>'],
+  ])('%s preserves empty unterminated lines through a non-matching replace', (_, input, expected) => {
+    expect(run(input, op('trim'), op('replace', { find: 'x', replacement: 'y' }), op('prefix', { text: '>' })))
+      .toBe(expected);
+  });
+  it('R3 preserves CRLF and the terminal newline during insensitive replace within lines', () => {
+    expect(run('a\r\nXa\r\n', op('replace', { find: 'x', replacement: 'y', caseSensitive: false })))
+      .toBe('a\r\nya\r\n');
+  });
+  it('reports mixed from untouched F12 input on a validation error', () => {
+    const input = fixtures[11][1];
+    expect(transformText(input, [op('trim'), op('replace')]))
+      .toMatchObject({ text: input, error: expect.any(String), mixed: true });
   });
   it('rejects empty find atomically before applying any changes', () => {
     expect(transformText(' a ', [op('trim'), op('replace')])).toMatchObject({ text: ' a ', error: expect.any(String) });

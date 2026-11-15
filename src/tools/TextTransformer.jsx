@@ -4,7 +4,7 @@
  * @license MIT
  * @see https://github.com/vintagedon/ops-toolbox
  */
-import { useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { OPERATIONS, createOperation, parseText, transformText } from '../lib/textTransform.js';
 import { useDebouncedValue } from '../hooks/useDebouncedValue';
 import CopyButton from '../components/CopyButton';
@@ -65,6 +65,7 @@ export default function TextTransformer() {
   const [adding, setAdding] = useState('collapse');
   const nextId = useRef(1);
   const importRevision = useRef(0);
+  const pasteSelection = useRef(null);
   const request = useMemo(() => ({ text: source.text, operations }), [source.text, operations]);
   const debounced = useDebouncedValue(request);
   const result = useMemo(() => transformText(debounced.text, debounced.operations), [debounced]);
@@ -73,6 +74,13 @@ export default function TextTransformer() {
   const beforeLines = useMemo(() => parseText(source.text).lines.length, [source.text]);
   const afterLines = useMemo(() => parseText(result.text).lines.length, [result.text]);
   const mixed = useMemo(() => source.mixed || parseText(source.text).mixed, [source.text, source.mixed]);
+
+  useLayoutEffect(() => {
+    if (!pasteSelection.current) return;
+    const { field, caret } = pasteSelection.current;
+    field.setSelectionRange(caret, caret);
+    pasteSelection.current = null;
+  }, [source]);
 
   function updateOperation(id, changes) {
     setOperations(current => current.map(operation => operation.id === id ? { ...operation, ...changes } : operation));
@@ -95,8 +103,10 @@ export default function TextTransformer() {
   function paste(event) {
     event.preventDefault();
     const field = event.currentTarget;
+    const pasted = event.clipboardData.getData('text/plain').replace(/\r\n|\r/g, '\n');
+    pasteSelection.current = { field, caret: field.selectionStart + pasted.length };
     const text = field.value.slice(0, field.selectionStart)
-      + event.clipboardData.getData('text/plain').replace(/\r\n|\r/g, '\n')
+      + pasted
       + field.value.slice(field.selectionEnd);
     const imported = { ...editedSource(text, source), bom: false };
     importRevision.current++;

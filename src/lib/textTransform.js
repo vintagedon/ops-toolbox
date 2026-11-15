@@ -83,6 +83,9 @@ function validationError(operation) {
     return 'Prefix and suffix must be literal text.';
   }
   if (operation.type === 'replace' && typeof operation.replacement !== 'string') return 'Replacement must be literal text.';
+  if (operation.type === 'replace' && /[\r\n]/.test(operation.find + operation.replacement)) {
+    return 'Find and replacement text must not contain CR or LF.';
+  }
   return null;
 }
 
@@ -91,7 +94,7 @@ export function transformText(input, operations) {
   const enabled = operations.filter(operation => operation.enabled);
   for (const operation of enabled) {
     const error = validationError(operation);
-    if (error) return { text: input, error, mixed: false };
+    if (error) return { text: input, error, mixed: parseText(input).mixed };
   }
   const model = parseText(input);
   for (const operation of enabled) {
@@ -110,8 +113,7 @@ export function transformText(input, operations) {
         // Escape every metacharacter: users supply literal strings, never patterns.
         const escaped = operation.find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const pattern = new RegExp(escaped, operation.caseSensitive ? 'gu' : 'giu');
-        const replaced = parseText(serializeText(model).replace(pattern, () => operation.replacement));
-        Object.assign(model, replaced, { mixed: model.mixed || replaced.mixed });
+        model.lines = model.lines.map(line => line.replace(pattern, () => operation.replacement));
         break;
       }
     }

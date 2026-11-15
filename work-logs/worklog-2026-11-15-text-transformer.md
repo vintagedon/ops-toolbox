@@ -2,7 +2,7 @@
 title: "1.2 Text Transformer execution"
 description: "Local gate evidence and review handoff for issue 12"
 date: "2026-11-15"
-status: "blocked"
+status: "complete"
 tags:
   - type: worklog
   - domain: data
@@ -468,7 +468,117 @@ environment read or network request occurred. No dependency, configuration,
 workflow, AGENTS.md, CLAUDE.md, REVIEW.md or case variant changes. No repository
 file deletion. All previous gate and author commits remain intact.
 
-## Proposed PR body (v0.5 stop; supersedes v0.4 body, held)
+### Resumed execution under v0.6 (1.2.6)
+
+Authority: Don's forwarded authorization resumes only gate 1.2.6 under Claude's
+v0.6 amendment (SD-438), resolving the preceding validation conflict. Run
+`opstoolbox126b-codex-20261115T170729Z-b7c49d` started clean on the existing
+branch at `6cc561d129ddfd0ec8614819deae643139793bc1`. Approved spec SHA-256:
+`5a22c2fd6b4368f3e7fbe5e3ee53233572bb2c45b3ba36693fddbcbfac2716a1`
+(verified before editing). Read repository AGENTS.md, both v0.5/v0.6 version
+notes, the Find / replace row, the amended paste sentence and gate 1.2.6 in
+full. Earlier gate commits and the historical stop above remain intact.
+
+Data decisions: Find / replace maps literal replacements over the existing
+lines, retaining line count, style and terminal-newline flag. Either CR or LF
+in either argument is rejected before any operation runs. An invalid operation
+returns the exact untouched input with its parsed `mixed` flag. The former
+cross-line matching test is explicitly superseded by v0.6 and rewritten as
+R4 rejection; no frozen fixture or other operation's semantics changes.
+
+Architecture: `textTransform.js` validates the two literal arguments and maps
+over `model.lines`, retaining its escaped-pattern/callback implementation for
+literal metacharacters and dollar replacements. `TextTransformer.jsx` records
+the browser-normalized insertion offset plus pasted length, then restores the
+collapsed selection in a layout effect after React updates Input. Existing
+style restoration and pasted-baseline behavior continue unchanged.
+
+Tests add R1/R2 (Trim, non-matching replace, Prefix with Collapse absent), R3
+(insensitive replacement with CRLF and final newline), R4/R5 (both CR and LF
+in search and replacement), invalid-operation F12 with `mixed: true`, and the
+component paste-caret check. The latter starts with `abc`, pastes `XY` at 1,
+asserts selection `[3, 3]` after render, then inserts `z` at that selection and
+asserts `aXYzbc` in Input and Preview. The original literal `$&` test remains.
+Targeted suites: 64 pure plus 15 component tests pass, 79 total, 10.65 s under
+default Node v24.22.0 / npm 11.19.1 (not claimed as CI parity).
+
+Mutation evidence, each in its own disposable `/tmp` source/test copy with the
+repository node_modules linked for execution only:
+
+- M6 restores serialize-and-reparse replacement. Exit 1; exactly R1 and R2
+  fail, 62 other pure tests pass. R1 receives empty text instead of `>`; R2
+  receives `>\n` instead of `>\n>`. Vitest 0.465 s; subprocess 1.057 s.
+- M7 removes the layout effect's selection restoration. Exit 1; exactly the
+  paste-caret test fails, receiving offset 5 instead of 3; 14 other component
+  tests pass. Vitest 11.42 s; subprocess 12.020 s.
+- Both scratch sources were restored byte for byte and compared with the
+  unchanged repository sources before their copies were removed. Source
+  SHA-256: pure module
+  `66464337511f8b4409bfb1156e2185accd16e563826b912f84c32b563eea18c9`;
+  component
+  `3e7d82d63a5ccf514007b3fac35016d6c59c421b991bcaaf3ad2e33ddaf447b2`.
+
+Precommit pinned-toolchain validation reports Node v22.23.5 / npm 12.0.2.
+Its first full run had 632 passes and one unrelated failure in
+`tests/lib/password.test.js:338`, "generates correct number of words split by
+separator": splitting a six-word random passphrase on `-` yielded seven parts.
+Read-only inspection found `yo-yo` among the 1296 default wordlist entries;
+the generator joins randomly sampled words with `-`. This explains a
+stochastic failure of that assertion, rather than an unsatisfiable validation
+contract like the v0.5 stop. No password code, test, wordlist, randomness or
+validation command was changed. One unchanged full rerun passes all 66 files /
+633 tests in 12.39 s (initial failed run 12.58 s). Production build then passes,
+Vite 1.01 s, with 27 route HTML files and 27 sitemap locations. Existing large
+chunk warnings remain. This failure and rerun are disclosed for reviewer review.
+
+Browser qualification: Python Playwright 1.64.0 from `/opt/agents/venv`, using
+`PLAYWRIGHT_BROWSERS_PATH=/opt/agents/data-storage-write/playwright-browsers`,
+Chromium 156.0.8078.4. Built output was served by
+`npx vite preview --host 127.0.0.1 --port 4176 --strictPort`. A fresh context
+aborts and logs every request outside that origin. With `abc` in Input,
+Home/ArrowRight positions the caret at 1; a real clipboard Control+V pastes
+`XY`, selection is `[3, 3]`, and real keyboard typing `z` gives `aXYzbc`.
+The debounced preview agrees. Importing F4 without BOM, Control+End and typing
+`c`, then downloading with default Collapse gives exactly
+`[97, 13, 10, 13, 10, 98, 13, 10, 99]`, hex `610d0a0d0a620d0a63`,
+text `a\r\n\r\nb\r\nc`. Browser run 1.073 s. External aborted requests `[]`;
+console/page errors `[]`. No browser download. The task-owned preview was stopped.
+
+Scope checks: the fixture table/array remains unchanged; the spec changes only
+its status to `under-review`. Only the four authorized source/test files, this
+worklog and spec status change. No dependency, configuration, workflow,
+AGENTS.md, CLAUDE.md, REVIEW.md or case variant changes; no repository file is
+deleted. `git diff --check` passes. Primary checkout stays clean on main at
+`069a9e70aa1b231b6497f04b61f47549f4b1471b`, also the merge-base. No model switch,
+other agents, gh, auth/token-store read, secret-environment read, remote query,
+push, PR update, issue comment or other GitHub action. Network is limited to
+the package registries for the toolchain and the required local preview.
+
+Runtime receipts: actual hostname `ml01a`; `codex --version` reports
+`codex-cli 0.163.0` with the existing read-only PATH-alias warning. No trustworthy
+executor model identifier is exposed to this session: `unreported`; dispatch
+metadata is not substituted for an observed runtime identity. First command
+receipt `2026-11-15T17:07:53Z`; browser-completion receipt
+`2026-11-15T17:10:58Z`, a measured interval of 3 min 05 s, not total session
+duration. Individual validation durations appear above.
+
+One local implementation commit follows the existing `e14e34f` stop and
+`6cc561d` amendment since `c6ad15e`. To preserve that single commit and validate
+its exact bytes, clean committed-checkout CI parity runs after this seal in
+a detached worktree created with `git worktree add` under `/tmp`. No
+node_modules copy or link is used there:
+
+```sh
+npx -y -p node@22 -p npm@12.0.2 -- sh -c 'node -v && npm -v && npm ci && npm run test && npm run build'
+```
+
+The executor handoff records the enclosing commit's SHA and the actual
+post-commit result and timings; no post-commit success is claimed in advance.
+The temporary worktree is removed afterwards. A validation that cannot pass
+as written invokes the dispatched stop rule. Exit status alone is not
+acceptance; Claude reviews before publication.
+
+## Proposed PR body (v0.6; supersedes v0.5 stop body, held locally)
 
 Title: `feat: add local Text Transformer workspace`
 
@@ -478,17 +588,20 @@ BOM preservation, copy and download keep processing local. The completed
 1.2.5 gate preserves uniform imported CRLF/CR on edits and pastes; About says
 25 tools. Hero image, alt text and OG card remain deferred to spec 1.1.
 
-Prior validation: gate 1.2.5 records 625 passing tests, build and browser
-qualification; its committed-checkout parity receipt remains in that run's
-handoff. Gate 1.2.6 has stopped before implementation: the new LF-search
-rejection conflicts with an existing test requiring cross-line replacement.
-Baseline pure tests pass 57/57; a scratch probe satisfying the new rejection
-fails exactly that contradictory test (56/57 pass). This gate adds no product
-changes and claims no mutation, browser, build or CI-parity qualification.
+Find / replace now operates within each line, preserving empty lines and line
+metadata through ordered operations. CR/LF in either argument is rejected;
+validation errors retain the input's mixed-ending flag. Pasting at an interior
+caret leaves it after the inserted text so typing continues there.
 
-**Hold:** author resolution of the validation conflict and a new execution are
-required for the two v0.5 fixes. Claude reviews before publication. This body
-is prepared locally only; PR #16 was not changed.
+Gate 1.2.6 validation: 633 tests pass under Node 22.23.5 / npm 12.0.2, and the
+production build emits 27 routes. An initial unrelated random password-test
+failure is recorded above; the unchanged rerun passes. M6 detects the lost-line
+regression in R1/R2; M7 detects the caret regression. Python Playwright 1.64.0 /
+Chromium 156.0.8078.4 verifies real clipboard paste/typing and exact F4 CRLF
+download bytes, with no external requests or browser errors. Final exact-commit
+clean-checkout CI parity is reported in the executor handoff. Earlier gate
+qualification remains recorded above. Existing large build chunks remain a
+warning. Claude's review is pending; PR #16 was not changed.
 
 Closes #12
 
@@ -499,3 +612,12 @@ validation stop rule. Gate 1.2.5 and earlier gates stand as committed; 1.2.6 is
 unimplemented. This single local stop commit changes only the worklog; its
 exact SHA is provided in the executor handoff. No acceptance, completion,
 publication, next-spec dispatch or permission to push is implied.
+
+## Re-seal after 1.2.6 implementation (v0.6)
+
+Re-sealed 2026-11-15 on ml01a with status **complete** for gate implementation;
+spec status is **under-review**. The historical blocked seal records the v0.5
+conflict, now resolved by SD-438. Earlier gates stand as committed. Final
+clean committed-checkout validation follows this single gate commit as described
+above and is reported with its SHA in the handoff. No acceptance, publication,
+next-spec dispatch or permission to push is implied.

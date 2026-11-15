@@ -220,6 +220,22 @@ describe('TextTransformer', () => {
     expect(preview().textContent).toBe('a\n\nb');
   });
 
+  it('keeps the caret after pasted text so typing continues there', async () => {
+    render(<TextTransformer />);
+    edit('abc');
+    const field = input();
+    field.focus();
+    field.setSelectionRange(1, 1);
+    fireEvent.paste(field, { clipboardData: { getData: () => 'XY' } });
+    expect(field).toHaveValue('aXYbc');
+    expect(field.selectionStart).toBe(3);
+    expect(field.selectionEnd).toBe(3);
+    edit(field.value.slice(0, field.selectionStart) + 'z' + field.value.slice(field.selectionEnd));
+    expect(field).toHaveValue('aXYzbc');
+    await ready();
+    expect(preview().textContent).toBe('aXYzbc');
+  });
+
   it('reports mixed imported endings and uses LF output', async () => {
     render(<TextTransformer />);
     upload(new File(['a\r\n\nb\r'], 'mixed.txt'));
