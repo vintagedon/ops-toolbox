@@ -10,11 +10,13 @@ tags:
 
 # 1.1 Sentinel workspace
 
-v0.1 (GPT, 2026-11-14). v0.2 (Claude, 2026-11-15, triad review): pinned Sentinel
-baseline, raw palette clearing in gate 2, hero image and social card in scope,
-default theme raised as an open decision, runs after spec 1.2. Not yet
-dispatchable: it waits on the default-theme answer and still needs the scope,
-validation and closeout sections that specs 1.0 and 1.2 carry.
+v0.1 (GPT, 2026-11-14). v0.2 (Claude, 2026-11-15, triad review): raw palette
+clearing in gate 2, hero image and social card in scope, runs after spec 1.2.
+v0.3 (Claude, 2026-11-15, `recwmHfFnLprerWSF`): theme menu Light, Ember, Sea and
+System with Sea as the default; Slate and plain Dark leave the menu; the Sentinel
+pin moves to the merge of Sentinel spec 09, which adds Ember and Sea. Not yet
+dispatchable: it waits on Sentinel spec 09 and still needs the scope, validation
+and closeout sections that specs 1.0 and 1.2 carry.
 
 ## Outcome
 
@@ -25,10 +27,11 @@ of invented statistics. Existing URLs and all tools continue to work.
 
 ## Design and data contract
 
-Use the merged Sentinel baseline `a5e64fd4ab61a16fbacf414dd9a2740d8bddca2a` from
-`vintagedon/sentinel-website-framework` (Sentinel `main` head on 2026-11-15, the
-merge of PR #6 on 2026-11-10). Gate 1 confirms it is still an ancestor of Sentinel
-`main` and lists newer merged commits without adopting them.
+Use the Sentinel baseline at the merge commit of Sentinel spec 09 (Ember and Sea
+palettes) on `vintagedon/sentinel-website-framework` `main`, and record its full
+SHA at dispatch. Its parent baseline is `a5e64fd4ab61a16fbacf414dd9a2740d8bddca2a`
+(the merge of PR #6 on 2026-11-10). This spec does not dispatch until spec 09
+merges. Gate 1 lists other commits merged after spec 09 without adopting them.
 Read its design contract, implementation guide and shared tokens; carry attribution
 and license with copied material. Do not import the unmerged schema explorer or
 home widget grid. Keep React/Vite; use local React adapters where needed.
@@ -46,16 +49,24 @@ combine with local-only; show a clear empty state and reset. Do not persist tool
 inputs. Favorites and recent tools are deferred; avoid accounts and cross-device
 state in this spec.
 
-Refresh Light and Dark using Sentinel semantic roles. Retain High-Contrast Slate
-and System, density and font controls. Keep `ops-theme-preference` and existing
-values; map resolved values to Sentinel adapters without a flash or loss of saved
-preferences. Existing `data-theme` continues to drive Ops styles; mirror the
-resolved palette to `data-sentinel-theme` where an adapter needs it. Never add
-`.dark`. Do not add Moss in this first gate unless separately selected.
+**Theme menu (decided 2026-11-15, `recwmHfFnLprerWSF`).** Light, Ember, Sea and
+System, with Sea as the default. Light uses Sentinel's Light; Ember and Sea use the
+palettes Sentinel spec 09 adds, with values taken from Sentinel's tokens, not
+copied. System resolves an OS dark preference to Ember and a light preference to
+Light. High-Contrast Slate and plain Dark leave the menu, and Moss stays out of it.
+Keep density and font controls. Keep `ops-theme-preference` and migrate stored
+values explicitly, without a flash: `dark` and `slate` become `ember`; `light` and
+`system` stay; anything else falls back to the default. `data-theme` keeps driving
+Ops styles with the values `light`, `ember` and `sea`; mirror the resolved palette
+to `data-sentinel-theme`. Never add `.dark`.
 
-**Open operator decision: default theme.** The app defaults to System today. In
-September 2026 the operator stated a preference for Light by default. Gate 2 does
-not start until this spec records the answer.
+**Accessibility guarantee.** AGENTS.md names High-Contrast Slate "the
+accessibility guarantee". With Slate gone, the guarantee becomes: every palette in
+the menu meets WCAG 2.2 AA on its rendered pairs (Sentinel contract section 11), and
+the app stays operable under the operating system's forced-colors mode. Update
+AGENTS.md (the Stack line and the `data-theme` constraint, lines 12 and 56 at
+`75ba911`; the Tailwind `slate-*` prohibition and the archived-spec history keep
+their wording) and `docs/design/contrast-standard.md` to say so.
 
 ## Gates and acceptance
 
@@ -69,6 +80,9 @@ not start until this spec records the answer.
    Replace raw palette classes with semantic tokens first: at `75ba911`, 20 files
    in `src/` use `text-black` or `bg-white` (38 uses), which no palette reaches.
    `grep -rnwE '(text|bg|border|ring)-(black|white)' src` returns nothing.
+   Stored `dark` and `slate` load as Ember with no flash on first paint. Under
+   emulated `forced-colors: active`, focus rings, control boundaries and status
+   shapes stay visible on home and three representative tools.
 3. **Shell and home.** Refactor `ToolLayout`, directory and shared navigation.
    Keyboard users can find/open a tool, skip navigation, use settings and return
    home. Preserve meaningful headings, per-tool lazy imports and error boundaries.

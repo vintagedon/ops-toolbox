@@ -20,7 +20,7 @@ are proposed defaults for review. Spec numbers identify work, not a product vers
 |---|---|---|---|
 | 1 | [1.0 Dependency maintenance](spec-m1-0-dependency-maintenance.md) | Qualify major upgrades left after compatible closeout fixes | v0.2, awaiting GPT review |
 | 2 | [1.2 Text Transformer](spec-m1-2-text-transformer.md) | Ordered text operations with original/input/preview and safe file handling | v0.2, awaiting GPT review |
-| 3 | [1.1 Sentinel workspace](spec-m1-1-sentinel-workspace.md) | Persistent navigation, useful front page, coherent themes and capability filters | v0.2 draft; default theme undecided |
+| 3 | [1.1 Sentinel workspace](spec-m1-1-sentinel-workspace.md) | Persistent navigation, useful front page, coherent themes and capability filters | v0.3 draft; waits on Sentinel spec 09 (Ember and Sea) |
 | 4 | [1.3 Cloud subnet planner](spec-m1-3-cloud-subnet-planner.md) | Local provider-aware IPv4 planning, visual map and reusable exports | v0.1 draft |
 | 5 | [1.4 Release editions](spec-m1-4-release-editions.md) | One codebase, full and air-gapped artifacts, first connected DNS tool | v0.1 draft; connected tools undecided |
 
@@ -37,7 +37,8 @@ workflow changes, publication, or merges beyond the operator's stated scope.
 The closeout worklog records the current branch repair and dependency exceptions.
 Spec 1.0 precedes new functionality because outstanding upstream fixes cross major
 versions. Spec 1.2 runs next, on the current shell (operator decision, 2026-11-15);
-spec 1.1 then restyles it with every other tool. Spec 1.3 follows 1.1 because it
+spec 1.1 then restyles it with every other tool, once Sentinel spec 09 has added
+the Ember and Sea palettes it ships. Spec 1.3 follows 1.1 because it
 adopts Sentinel patterns from 1.1's pinned baseline. Spec 1.4 packages their final
 output and waits on the operator's decision whether Ops Toolbox gets connected
 tools at all. Preserve existing tool routes throughout; multifunction pages
@@ -47,8 +48,9 @@ are a direction for useful consolidation, not an instruction to rewrite all tool
 
 - Retain React, pure computation modules, lazy tools, bundled fonts and semantic
   tokens. Consume Sentinel's merged foundations through a small React adapter.
-- Refresh Light and Dark; retain High-Contrast Slate and System. Moss is an
-  optional later palette, not a required visual identity.
+- Theme menu: Light, Ember, Sea and System, with Sea as the default (decided
+  2026-11-15). Ember and Sea come from Sentinel spec 09. High-Contrast Slate and
+  plain Dark leave the menu; Moss stays out of it.
 - Local-only is a capability filter in the full edition. Air-gapped is a tested
   distribution with connected code omitted, not just a hidden menu item.
 - Cloud planning means provider rules, sizes and reserved addresses. It needs no
