@@ -189,3 +189,46 @@ Expander`; directory links resolve relative paths, so match their href suffix.
 These were scratch harness assumptions, not app failures or compatibility edits.
 The checkpoint is amended into this gate commit and the final commit is rechecked
 from a clean worktree before gate 1.0.4.
+
+## Gate 1.0.4 — Mermaid stack
+
+Final gate 1.0.3 commit `54c83cc` passed from clean `/tmp/ops10-gate3-final`:
+Node v22.23.5 / npm 12.0.2; `npm ci` 2.34 s; 550 tests / 63 files (6.25 s),
+build 1.11 s / 26 routes. Final-commit browser run again passed all 27 direct
+loads and history traversal with 0 exceptions / 0 external requests. PASS.
+
+Upgrade: `npm install 'mermaid@^12.3.0' '@mermaid-js/layout-elk@^1.0.2'`.
+Add `tests/lib/mermaidConfig.test.js` as the security qualification explicitly
+required by this gate: each of dark/light × dagre/elk must stay strict (4 cases).
+Existing Markdown sanitization tests and JSON handling are unchanged. No application compatibility edit was required.
+
+Clean candidate `557966b`, `/tmp/ops10-gate4`, Node **v22.23.5** / npm
+**12.0.2**: `npm ci` 2.43 s; **554 tests in 64 files** (6.32 s), exactly
+baseline 550 plus the four required strict-mode cases; build 1.13 s / 26 routes.
+`npm ls mermaid katex @mermaid-js/layout-elk --all` shows **12.3.0 / 0.18.10 /
+1.0.2**, all deduped, no affected versions. `npm audit --json` exits 0:
+**0 critical, 0 high, 0 moderate, 0 low, 0 info, total 0**.
+
+Production preview browser (Playwright 1.64.1 / Chromium 156.0.8078.4) passed:
+Dagre flowchart and ELK flowchart (2 nodes each), KaTeX flowchart (`.katex`
+exists), SVG export **11,918 bytes** (valid XML, image decodes **300×53**), PNG
+export **8,968 bytes** (PNG signature, image decodes **720×128**). PNG visually
+inspected: Alpha → Beta labels, boxes and arrow visible.
+
+Valid callback fixture: `flowchart LR\n A[Safe] --> B[Target]\n click A call
+alert(1)` rendered two nodes; clicked Safe/A. Valid HTML fixture: `flowchart LR\n
+A["<img src=x onerror=alert(1)>"] --> B[Target]` rendered two nodes. **No dialogs,
+no onerror attribute, no page exceptions or external requests**. The app still
+ignores bindFunctions; these are behavior checks, not proof of strict mode.
+
+Mutation in the scratch checkout only: replace `securityLevel: 'strict'` with
+`'loose'`; run `npm run test -- tests/lib/mermaidConfig.test.js`. Expected exit
+**1**, **4 failed / 4**, each `expected 'loose' to be 'strict'` at test line 13.
+Finally restored original config bytes, then `npm run test --
+tests/lib/mermaidConfig.test.js tests/lib/markdownUtils.test.js`: **18 tests in
+2 files passed** (0.560 s). Scratch `git status` is clean after restoration;
+`git diff main -- tests/lib/markdownUtils.test.js src` is empty. Existing Markdown
+and JSON sanitization is untouched.
+
+The checkpoint is amended into the same gate commit, then its final commit is
+validated in a fresh clean checkout before release proof.
