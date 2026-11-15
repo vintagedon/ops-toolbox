@@ -2,8 +2,8 @@
 title: "1.2 Text Transformer"
 description: "Ordered local text transformations with preview, reversible application, and a zero-click blank-line default"
 date: "2026-11-15"
-version: "0.3"
-status: "blocked"
+version: "0.4"
+status: "active"
 tags:
   - type: specification
   - domain: data
@@ -19,6 +19,8 @@ related_documents:
 v0.1 (GPT, 2026-11-14) set the interaction model. v0.2 (Claude, 2026-11-15, triad review) adds the blank-character definition, verified fixtures, the zero-click default, frozen registry fields, scope and closeout. The interaction model is unchanged.
 
 v0.3 (Claude, 2026-11-15, dispatch preflight) replaces the `node:22-alpine` container with the npx Node 22 / npm 12.0.2 toolchain, because the run account has no Docker access (SD-435). Scope is unchanged.
+
+v0.4 (Claude, 2026-11-15, review of the 1.2.1 to 1.2.4 run) resolves the executor's scope stop and one review finding, through gate 1.2.5. Modify gains `src/pages/About.jsx` line 21, the tool count the v0.3 grep never inspected (SD-436). The workspace now pins how Input edits and pastes treat a uniform CRLF or CR source; the browser reports textarea text with LF, so v0.3 code silently converted an imported CRLF file to LF on the first keystroke (SD-437). Frozen semantics, fixtures and registry fields are unchanged.
 
 ## Objective
 
@@ -55,6 +57,7 @@ Prior findings here (paths, line numbers, counts) were observed at `main` = `75b
 - `src/tools/TextTransformer.jsx` (new) and `tests/tools/TextTransformer.test.jsx` (new); helper components or a worker module beside it if needed
 - `src/lib/toolRegistry.js`: one entry. `src/App.jsx`: one lazy import. `src/components/DirectoryGrid.jsx`: the lucide import list and `ICONS` map only
 - `tests/lib/toolRegistry.test.js`: the four `24` occurrences (lines 14, 16, 110, 111) become `25`
+- `src/pages/About.jsx`: the tool count on line 21 only (v0.4)
 - `scripts/generate-meta.mjs`: the count in `SUMMARY` only
 - `README.md`: counts on lines 4, 19, 72, 84 and 225, `Tool 24` in the line-206 diagram, `### Data (5)` heading plus one row
 - `AGENTS.md`: counts on lines 10, 45 and 146
@@ -155,7 +158,7 @@ Build `src/lib/textTransform.js`: the line model, the operation descriptors abov
 
 ### Gate 1.2.2: Workspace
 
-Register the tool and build the page. Interaction is v0.1's: Input is the editable source; Preview evaluates enabled operations in visible order without mutating Input; add, remove, reorder (keyboard-operable buttons), disable and repeat operations. **Apply** replaces Input with Preview, stores the prior input for undo, and clears the applied operation list. **Undo Apply** restores input and list; keep at most ten snapshots. **Restore original** restores the last imported or pasted baseline, confirming first if edits would be lost; editing Input does not change the baseline. Counters show lines and characters before and after.
+Register the tool and build the page. Interaction is v0.1's: Input is the editable source; Preview evaluates enabled operations in visible order without mutating Input; add, remove, reorder (keyboard-operable buttons), disable and repeat operations. **Apply** replaces Input with Preview, stores the prior input for undo, and clears the applied operation list. **Undo Apply** restores input and list; keep at most ten snapshots. **Restore original** restores the last imported or pasted baseline, confirming first if edits would be lost; editing Input does not change the baseline. **Edits keep a uniform style (v0.4):** a textarea reports its text with LF only, so when the current source's terminators are uniformly CRLF or uniformly CR, every LF in edited or pasted Input text is converted back to that style before it becomes the source. A mixed or LF source keeps the browser's LF, and the mixed-ending notice still applies. Counters show lines and characters before and after.
 
 Files: accept up to 2 MiB, reject invalid UTF-8 and NUL-containing input with an explanation and the prior state intact. Strip one leading UTF-8 BOM on import and restore it on download. Download a new `.txt`; never overwrite. Copy and Download act on the current preview only and are disabled while preview is stale or invalid. Use `useDebouncedValue` and `CopyButton`/`useClipboard`. No content in `localStorage`. If measured preview work on the F2 text repeated to 2 MiB exceeds 100 ms on ml01a, move evaluation to a worker. Never truncate preview or output.
 
@@ -214,6 +217,23 @@ Follow "Executing a Work Spec" in `AGENTS.md`. Branch `task/1-2-text-transformer
 - [ ] Nothing was pushed: `git ls-remote origin task/1-2-text-transformer` returns nothing.
 - [ ] The worklog records base commit, gate SHAs, mutation results, timing and worker decision, toolchain versions, the remaining-`24` list and the PR body, and is sealed.
 
+### Gate 1.2.5: Review amendments (v0.4)
+
+Make the two v0.4 changes on the existing branch, after the 1.2.4 commit: About's count, and edits that keep a uniform CRLF or CR style. Nothing else changes; frozen semantics, fixtures, registry fields and every do-not-touch item stand.
+
+**Validation:**
+
+- [ ] `src/pages/About.jsx` line 21 says `{25}`; `git diff` of About shows that line only. The gate 1.2.3 grep, extended with `src/pages/About.jsx`, returns no tool-count `24`.
+- [ ] Component test: import the F4 input as a file without a BOM, place the caret at the end of Input, type `c`, wait for the debounce; Download produces exactly `a\r\n\r\nb\r\nc` (the default Collapse pipeline).
+- [ ] Component test: import the F5 input (`a\r\rb`) as a file, type `c` at the end; Download produces exactly `a\r\rbc`.
+- [ ] Component test: after importing the F4 input, paste `x\ny` at the end of Input; every terminator in the resulting source is CRLF, and the new baseline is that CRLF text.
+- [ ] Component test: after importing the F12 input (mixed), typing keeps LF output and the mixed-ending notice.
+- [ ] Mutation M5: remove the style restoration from the edit path in a scratch copy; at least the F4-edit test fails. Restore it byte for byte.
+- [ ] Playwright (Python, as gate 1.2.3): import the F4 input file on `/text-transformer`, type one character at the end of Input, download; the bytes equal `a\r\n\r\nb\r\n` plus that character.
+- [ ] Under Node 22 and npm 12.0.2 through the npx toolchain, a clean checkout of the gate commit passes `npm ci`, `npm run test` and `npm run build`.
+- [ ] The worklog gains a 1.2.5 section (amendment authority, changes, test and mutation results, browser bytes) and is re-sealed with status complete; the proposed PR body still carries `Closes #12`. This spec's status becomes `under-review`.
+- [ ] `git log main..HEAD` shows the four earlier commits plus one 1.2.5 commit; nothing was pushed.
+
 ## Constraints
 
 - **Do not use `trim()` or a bare `\s` test for blank lines or trimming.** Both miss zero-width characters, the reason this tool exists. M1 proves it.
@@ -235,6 +255,7 @@ Frozen: the line model, the blank set, every operation's semantics, the default 
 2. 1.2.2 workspace
 3. 1.2.3 counts, docs, qualification (toolchain and browser results are final only after 1.2.2)
 4. 1.2.4 closeout
+5. 1.2.5 review amendments (v0.4), then re-seal
 
 No batch renaming, multi-file editing, automatic saving or online processing in this release.
 
