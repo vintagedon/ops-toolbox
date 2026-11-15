@@ -190,3 +190,90 @@ image availability and Docker-action support in the separate workflow review.
   wording and the spec index needs separate scope.
 
 These follow-ups are proposals only, not additional dispatched work.
+
+## Reviewer verification (Claude, 2026-11-15)
+
+**Reproduced.** From a clean `git archive` of `e10ded6`, under Node v22.23.5 / npm
+12.0.2: `npm ci` passes; `npm audit` reports 0 entries at every severity; 554 of
+554 tests pass in 64 files; the build passes with only the pre-existing
+large-chunk advisory and none of the three baseline deprecation warnings; `npm ls`
+matches R1 to R7. Setting `securityLevel: 'loose'` in a scratch copy fails 4 of 4
+cases in `tests/lib/mermaidConfig.test.js`; the source was restored. A separate
+Playwright 1.64.1 pass against the built site, with every request outside the local
+server aborted: 27 routes (home, about, not-found and the 24 tools) render a
+heading, with zero page errors, zero console errors and zero off-host requests;
+Mermaid renders its default diagram; back and forward land correctly.
+
+**Scope.** 11 files changed, all in Modify. `AGENTS.md` changes only lines 12 and
+16. `.github/` and `Dockerfile` are unchanged. Nothing was pushed before review.
+
+**W evidence.** The UNVERIFIED marks above came from the dispatch prompt, which
+limited the run to package registries while gate 1.0.5 asks for resolved action
+declarations. That conflict was the dispatcher's. It is closed here with read-only
+GitHub API reads and the logs of production run 43719022719 (merge `73bd13f`,
+2026-11-15 13:26 UTC), which still carries all three annotations.
+
+**D1 supplement.** `package-lock.json` carries the musl native builds that Vite 8
+needs on the Alpine build stage (`@rolldown/binding-linux-x64-musl`,
+`lightningcss-linux-x64-musl`). This lowers the risk; it does not replace building
+the image.
+
+### W1, corrected
+
+The current releases are `actions/checkout` v7.0.1
+(`3d3c42e5aac5ba805825da76410c181273ba90b1`) and `actions/setup-node` v7.1.0
+(`949feb2413d6458794dcd2491c4babbbce0c15c1`), both `node24`, and both still declare
+the inputs this workflow passes (`submodules`, `lfs`, `node-version`). Release
+notes from v4 to v7: checkout v6 keeps persisted credentials in a separate file
+(this workflow does not reuse them); setup-node v5 enables package-manager caching
+automatically only when `package.json` has a `packageManager` field, which this
+repository does not. Pinned diff, replacing W1's v5 tags:
+
+```diff
+-      - uses: actions/checkout@v3
++      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+@@
+-      - uses: actions/setup-node@v4
++      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+```
+
+### W2, corrected
+
+Root cause: `@v1` resolves to the lightweight tag `v1`, commit `1a947af` of
+2021-03-03, whose `action.yml` declares 11 inputs and neither `skip_api_build` nor
+`production_branch`. The branch `v1`, commit `4d27395` of 2024-09-11 and 28 commits
+ahead, declares both. Both commits build `mcr.microsoft.com/appsvc/staticappsclient:stable`,
+so the deploy client is the same. Removing the inputs (the W2 diff above) carries
+the classification risk W2 describes. Pinning the branch head clears the warning
+and hands the client both inputs as declared; their values (`main`, `true`) match
+how the site deploys today (main is production; there is no API). For both the
+upload step (line 41) and the close step (line 68):
+
+```diff
+-        uses: Azure/static-web-apps-deploy@v1
++        uses: Azure/static-web-apps-deploy@4d27395796ac319302594769cfe812bd207490b1 # v1 branch head
+```
+
+### W3, corrected
+
+Production run 43719022719 already ran on `ubuntu-26.04` (image 20261111.196) and
+deployed successfully. The migration has happened, so pinning `ubuntu-24.04` would
+move back to an image this workflow no longer runs on. For both jobs (lines 15 and
+61):
+
+```diff
+-    runs-on: ubuntu-latest
++    runs-on: ubuntu-26.04
+```
+
+### Reviewer recommendations
+
+- D1: yes, build and smoke-test the image on a host with Docker before the next
+  release tag. It does not block this merge; `Dockerfile` is unchanged.
+- W1: yes, as corrected.
+- W2: no to removing the inputs; yes to the pin.
+- W3: yes, as corrected.
+- The three workflow edits travel together as one separate, explicitly approved
+  workflow change, qualified by its own PR preview and the following production
+  deploy (main stays production, the PR stays a preview, closing the PR removes
+  only its preview).
