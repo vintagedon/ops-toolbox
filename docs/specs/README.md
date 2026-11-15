@@ -22,7 +22,7 @@ are proposed defaults for review. Spec numbers identify work, not a product vers
 | 2 | [1.2 Text Transformer](spec-m1-2-text-transformer.md) | Ordered text operations with original/input/preview and safe file handling | v0.2, awaiting GPT review |
 | 3 | [1.1 Sentinel workspace](spec-m1-1-sentinel-workspace.md) | Persistent navigation, useful front page, coherent themes and capability filters | v0.3 draft; waits on Sentinel spec 09 (Ember and Sea) |
 | 4 | [1.3 Cloud subnet planner](spec-m1-3-cloud-subnet-planner.md) | Local provider-aware IPv4 planning, visual map and reusable exports | v0.1 draft |
-| 5 | [1.4 Release editions](spec-m1-4-release-editions.md) | One codebase, full and air-gapped artifacts, first connected DNS tool | v0.1 draft; connected tools undecided |
+| 5 | [1.4 Release editions](spec-m1-4-release-editions.md) | One codebase, full and air-gapped artifacts, first connected DNS tool | v0.1 draft; editions decided, first online tool pending |
 
 Triad review (Claude, 2026-11-15) hardened 1.0 and 1.2 for dispatch after GPT
 review and carried its findings into 1.1. The November 4 central blank line
@@ -40,8 +40,8 @@ versions. Spec 1.2 runs next, on the current shell (operator decision, 2026-11-1
 spec 1.1 then restyles it with every other tool, once Sentinel spec 09 has added
 the Ember and Sea palettes it ships. Spec 1.3 follows 1.1 because it
 adopts Sentinel patterns from 1.1's pinned baseline. Spec 1.4 packages their final
-output and waits on the operator's decision whether Ops Toolbox gets connected
-tools at all. Preserve existing tool routes throughout; multifunction pages
+output. Full and air-gapped editions are decided (operator, 2026-11-14, restated
+2026-11-15); which connected tool ships first is still pending. Preserve existing tool routes throughout; multifunction pages
 are a direction for useful consolidation, not an instruction to rewrite all tools.
 
 ## Design decisions carried forward
