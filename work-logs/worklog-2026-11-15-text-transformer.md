@@ -2,7 +2,7 @@
 title: "1.2 Text Transformer execution"
 description: "Local gate evidence and review handoff for issue 12"
 date: "2026-11-15"
-status: "complete"
+status: "blocked"
 tags:
   - type: worklog
   - domain: data
@@ -388,3 +388,114 @@ spec status is **under-review**. The historical blocked seal above describes the
 prior run and is preserved. The v0.4 authority resolves its scope stop. Final
 committed-checkout validation follows this single gate commit as described above.
 No acceptance, publication, next-spec dispatch or permission to push is implied.
+
+
+## Gate 1.2.6: validation conflict stop (v0.5)
+
+**Outcome: blocked; gate 1.2.6 is not implemented or complete.** Don's
+forwarded authorization dispatches this gate only, with Claude as spec author
+and reviewer. Run `opstoolbox126-codex-20261115T163852Z-3f9137` started from a
+clean `task/1-2-text-transformer` worktree at
+`c6ad15eda1b2517c7e2a03f38c34caa9e877691a`. Spec v0.5 SHA-256 verified:
+`635671529309af779b27216ac9e6bc3337393e56ad0aafe4b218a4f870d50404`.
+Read repository AGENTS.md, the v0.5 note, operations table, amended workspace
+paragraph and gate 1.2.6 in full. Earlier gates remain as committed.
+
+Data decision: the v0.5 Find / replace row rejects CR or LF in either argument;
+R4 also requires an LF-containing search to return unchanged input with an
+error. Gate 1.2.6 simultaneously requires every existing Find / replace test to
+pass. At the authorized commit, `tests/lib/textTransform.test.js:66-68` says:
+
+```js
+it('replaces literal line breaks across lines', () => {
+  expect(run('a\nb\n', op('replace', { find: '\nb', replacement: '+' }))).toBe('a+\n');
+});
+```
+
+These requirements conflict: rejecting that LF-containing search must return
+`a\nb\n`, whereas the existing test requires `a+\n`. A compliant implementation
+cannot pass the existing test as written. The explicit dispatch rule says,
+"A validation that cannot pass as written is a stop condition, not a reason to
+edit the validation." No fixture or test expectation was edited to hide it.
+
+Architecture: no repository product changes. To reproduce the conflict,
+a disposable `/tmp/opstoolbox126-conflict-nj9j92n1` copy held the pure module,
+its unchanged test, package manifest, Vite config and setup file, with a link
+to the existing node_modules. Only the scratch module changed: replacement
+mapped over model.lines, and validation rejected CR/LF in either argument.
+This probe is evidence of the stop condition, not a gate implementation or a
+mutation receipt. The scratch directory was removed, including its symlink;
+repository dependencies and source were untouched.
+
+Evidence:
+
+- Baseline `npm run test -- tests/lib/textTransform.test.js`: 57/57 pass,
+  Vitest 4.48 s, default Node v24.22.0 / npm 11.19.1.
+- Scratch, same unchanged tests: exit 1, 56 pass / one failure, exactly
+  `pipeline contracts > replaces literal line breaks across lines` at line 67.
+  Expected `a+\n`, received `a\nb\n`. Vitest 0.467 s; subprocess wall 1.059 s.
+  All frozen fixtures and the literal `$&` test still pass in that probe.
+- Test SHA-256 before and after:
+  `3d1ec142107e3639c9aae6adba0a1dcc3d66b06696d229ebf38974b4e74b95e4`.
+  `git diff` confirms all four allowed product/test files remain unchanged.
+- R1-R5, the paste-caret component test, M6/M7, Python Playwright, build and
+  clean committed-checkout Node 22 / npm 12.0.2 parity were not performed:
+  execution stopped before implementation. No claim of CI parity or gate
+  acceptance follows from the baseline or scratch exit status.
+
+Author resolution needed before a new execution: explicitly resolve whether
+the pre-existing cross-line replacement expectation is superseded by v0.5's
+CR/LF rejection, and amend the preservation validation accordingly. No spec
+amendment or validation edit is made by this executor. The spec status remains
+`active`, as received, because this gate cannot be re-sealed complete and
+submitted as implemented. The worklog's current status is `blocked`; historical
+complete seals remain intact.
+
+Runtime receipts: actual hostname `ml01a`; `codex --version` reports
+`codex-cli 0.163.0` with a read-only PATH-alias warning. The runtime provides no
+trustworthy executor model identifier here: `unreported`; the dispatch's model
+is not used as observed identity. First clock receipt `2026-11-15T16:39:09Z`;
+stop evidence receipt `2026-11-15T16:40:20Z`, a measured interval of 71 s,
+not total session duration. No model switch or other agents. The Playwright
+skill was read; the explicit Python requirement would govern browser checks,
+but none ran after the stop.
+
+Only this worklog changes in the single local 1.2.6 stop commit. Base and
+merge-base remain `069a9e70aa1b231b6497f04b61f47549f4b1471b`.
+Primary checkout was verified clean on main and remains unmodified. No push,
+remote query, PR update, issue comment, gh, auth/token-store read, secret
+environment read or network request occurred. No dependency, configuration,
+workflow, AGENTS.md, CLAUDE.md, REVIEW.md or case variant changes. No repository
+file deletion. All previous gate and author commits remain intact.
+
+## Proposed PR body (v0.5 stop; supersedes v0.4 body, held)
+
+Title: `feat: add local Text Transformer workspace`
+
+Adds tool 25 at `/text-transformer`, with Collapse blank lines enabled on load.
+Ordered operations, preview, Apply/Undo, baseline restore, UTF-8 validation,
+BOM preservation, copy and download keep processing local. The completed
+1.2.5 gate preserves uniform imported CRLF/CR on edits and pastes; About says
+25 tools. Hero image, alt text and OG card remain deferred to spec 1.1.
+
+Prior validation: gate 1.2.5 records 625 passing tests, build and browser
+qualification; its committed-checkout parity receipt remains in that run's
+handoff. Gate 1.2.6 has stopped before implementation: the new LF-search
+rejection conflicts with an existing test requiring cross-line replacement.
+Baseline pure tests pass 57/57; a scratch probe satisfying the new rejection
+fails exactly that contradictory test (56/57 pass). This gate adds no product
+changes and claims no mutation, browser, build or CI-parity qualification.
+
+**Hold:** author resolution of the validation conflict and a new execution are
+required for the two v0.5 fixes. Claude reviews before publication. This body
+is prepared locally only; PR #16 was not changed.
+
+Closes #12
+
+## Re-seal after 1.2.6 stop
+
+Re-sealed 2026-11-15 on ml01a with status **blocked** under the explicit
+validation stop rule. Gate 1.2.5 and earlier gates stand as committed; 1.2.6 is
+unimplemented. This single local stop commit changes only the worklog; its
+exact SHA is provided in the executor handoff. No acceptance, completion,
+publication, next-spec dispatch or permission to push is implied.
