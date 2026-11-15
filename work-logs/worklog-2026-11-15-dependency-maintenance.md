@@ -137,3 +137,24 @@ Supplementary raw logs/registry metadata are at `/tmp/ops10-evidence` on ml01a
 
 No questions were put to the operator during execution. The dispatch is the
 authorization; review and acceptance remain with Claude and Don.
+
+## Gate 1.0.2 — Build tooling
+
+Gate 1.0.1 final commit `9de1dfc` was independently checked in a clean detached
+worktree `/tmp/ops10-gate1`: Node v22.23.5, npm 12.0.2, `npm ci`, 550 tests
+in 63 files (6.76 s), build (15.02 s), audit seven entries as above. PASS.
+
+Upgrade command under the parity toolchain:
+`npm install --save-dev 'vite@^8.3.8' '@vitejs/plugin-react@^6.3.0'`.
+Only package manifest/lockfile change; no source/config compatibility edits were
+required by the supported default plugin API. Vitest remains 4.1.12. npm's
+post-install audit reports five entries (3 low, 2 moderate), with no high/critical.
+Clean candidate commit `f8a659e` validation at `/tmp/ops10-gate2` passed:
+Node **v22.23.5**, npm **12.0.2**, clean `git status`, `npm ci` (2.34 s),
+`npm ls vite esbuild --all` (Vite **8.3.8** deduped across plugin and Vitest;
+**no esbuild installed**), **550 tests in 63 files** (6.32 s Vitest duration),
+build (1.03 s Vite duration), 26 prerendered routes. All three baseline
+esbuild/oxc warnings are absent from both test and build logs. The existing
+large-chunk warning remains visible. Audit: 5 entries, 0 high/critical.
+This checkpoint is amended into the same gate commit; its final commit is then
+rechecked in a fresh clean worktree before Router work begins.

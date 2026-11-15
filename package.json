@@ -47,12 +47,12 @@
         "@testing-library/react": "^16.3.2",
         "@types/react": "^18.3.3",
         "@types/react-dom": "^18.3.0",
-        "@vitejs/plugin-react": "^4.3.1",
+        "@vitejs/plugin-react": "^6.3.0",
         "autoprefixer": "^10.4.20",
         "jsdom": "^28.1.0",
         "postcss": "^8.4.47",
         "tailwindcss": "^3.4.13",
-        "vite": "^5.3.1",
+        "vite": "^8.3.8",
         "vitest": "^4.1.0"
     }
 }
