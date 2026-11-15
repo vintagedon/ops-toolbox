@@ -20,7 +20,35 @@ const add = type => {
 };
 const upload = file => fireEvent.change(screen.getByLabelText(/Import UTF-8 file/), { target: { files: [file] } });
 
-afterEach(() => vi.restoreAllMocks());
+function typeAtEnd(text) {
+  const field = input();
+  field.focus();
+  field.setSelectionRange(field.value.length, field.value.length);
+  // Model the browser's change event after inserting at the textarea caret.
+  edit(field.value.slice(0, field.selectionStart) + text + field.value.slice(field.selectionEnd));
+}
+
+function captureDownload() {
+  let downloaded;
+  vi.stubGlobal('URL', class extends URL {
+    static createObjectURL = vi.fn(blob => { downloaded = blob; return 'blob:test'; });
+    static revokeObjectURL = vi.fn();
+  });
+  vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+  return async () => {
+    click('Download .txt');
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(new Uint8Array(reader.result));
+      reader.readAsArrayBuffer(downloaded);
+    });
+  };
+}
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.unstubAllGlobals();
+});
 
 describe('TextTransformer', () => {
   it('cleans F2 and copies the preview with no operation interaction', async () => {
@@ -130,6 +158,50 @@ describe('TextTransformer', () => {
     await waitFor(() => expect(input().value.length).toBe(text.length));
     await ready();
     expect(preview().textContent).toBe(text);
+  });
+
+  it.each([
+    ['F4', 'a\r\n\r\n\r\nb\r\n', 'a\r\n\r\nb\r\nc'],
+    ['F5', 'a\r\rb', 'a\r\rbc'],
+  ])('preserves %s file line endings when typing c at the end and downloading', async (_, text, expected) => {
+    const downloadBytes = captureDownload();
+    render(<TextTransformer />);
+    upload(new File([text], 'uniform.txt'));
+    await waitFor(() => expect(input().value).toBe(text.replace(/\r\n|\r/g, '\n')));
+    typeAtEnd('c');
+    await ready();
+    expect(Array.from(await downloadBytes())).toEqual(Array.from(new TextEncoder().encode(expected)));
+  });
+
+  it('restores CRLF throughout pasted F4 source and its new baseline', async () => {
+    const downloadBytes = captureDownload();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    render(<TextTransformer />);
+    upload(new File(['a\r\n\r\n\r\nb\r\n'], 'windows.txt'));
+    await waitFor(() => expect(input().value).toBe('a\n\n\nb\n'));
+    input().setSelectionRange(input().value.length, input().value.length);
+    fireEvent.paste(input(), { clipboardData: { getData: () => 'x\ny' } });
+    // Disable Collapse so downloaded bytes expose the complete source, including every terminator.
+    fireEvent.click(screen.getByLabelText('Enabled'));
+    await ready();
+    const expected = Array.from(new TextEncoder().encode('a\r\n\r\n\r\nb\r\nx\r\ny'));
+    expect(Array.from(await downloadBytes())).toEqual(expected);
+    typeAtEnd('c');
+    click('Restore original');
+    expect(window.confirm).toHaveBeenCalledOnce();
+    await ready();
+    expect(Array.from(await downloadBytes())).toEqual(expected);
+  });
+
+  it('keeps LF output and the mixed-ending notice after typing into imported F12', async () => {
+    const downloadBytes = captureDownload();
+    render(<TextTransformer />);
+    upload(new File(['a\r\n\nb\r'], 'mixed.txt'));
+    await screen.findByText(/Mixed line endings imported/);
+    typeAtEnd('c');
+    await ready();
+    expect(screen.getByText(/Mixed line endings imported/)).toBeInTheDocument();
+    expect(Array.from(await downloadBytes())).toEqual(Array.from(new TextEncoder().encode('a\n\nb\nc')));
   });
 
   it('restores the pasted baseline after editing, honors cancellation, and keeps the pipeline', async () => {

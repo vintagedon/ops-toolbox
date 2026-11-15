@@ -15,6 +15,16 @@ const button = 'px-3 py-2 bg-surface-2 hover:bg-surface-3 text-text-primary bord
 const MAX_BYTES = 2 * 1024 * 1024;
 const emptySource = { text: '', bom: false };
 
+/** Restore the current source style after textarea normalization; retain mixed import provenance. */
+function editedSource(text, source) {
+  const model = parseText(source.text);
+  return {
+    ...source,
+    text: text.replace(/\n/g, model.style),
+    mixed: source.mixed || model.mixed,
+  };
+}
+
 function readBytes(file) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -62,7 +72,7 @@ export default function TextTransformer() {
   const unavailable = stale || Boolean(result.error);
   const beforeLines = useMemo(() => parseText(source.text).lines.length, [source.text]);
   const afterLines = useMemo(() => parseText(result.text).lines.length, [result.text]);
-  const mixed = useMemo(() => parseText(source.text).mixed, [source.text]);
+  const mixed = useMemo(() => source.mixed || parseText(source.text).mixed, [source.text, source.mixed]);
 
   function updateOperation(id, changes) {
     setOperations(current => current.map(operation => operation.id === id ? { ...operation, ...changes } : operation));
@@ -78,7 +88,7 @@ export default function TextTransformer() {
 
   function changeInput(text) {
     importRevision.current++;
-    setSource(current => ({ ...current, text }));
+    setSource(current => editedSource(text, current));
     setError(null);
   }
 
@@ -88,7 +98,7 @@ export default function TextTransformer() {
     const text = field.value.slice(0, field.selectionStart)
       + event.clipboardData.getData('text/plain').replace(/\r\n|\r/g, '\n')
       + field.value.slice(field.selectionEnd);
-    const imported = { text, bom: false };
+    const imported = { ...editedSource(text, source), bom: false };
     importRevision.current++;
     setSource(imported);
     setBaseline(imported);

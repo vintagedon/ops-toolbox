@@ -2,7 +2,7 @@
 title: "1.2 Text Transformer execution"
 description: "Local gate evidence and review handoff for issue 12"
 date: "2026-11-15"
-status: "blocked"
+status: "complete"
 tags:
   - type: worklog
   - domain: data
@@ -260,3 +260,131 @@ Sealed 2026-11-15 on ml01a with status **blocked**. Gates 1.2.1-1.2.3 are
 implemented and qualified; gate 1.2.4 records the scope stop. No acceptance,
 publication or authorization for another spec is implied. No operator question
 was asked during execution; this handoff presents the concrete scope conflict.
+
+
+## Gate 1.2.5: Review amendments (v0.4)
+
+Authority: Don's execution authorization forwarded for this gate on 2026-11-15,
+with Claude as author/reviewer, resolves the earlier scope stop (SD-436) and
+edit-path finding (SD-437). Run `opstoolbox125-codex-20261115T155934Z-90fffe`.
+Startup was clean on `task/1-2-text-transformer` at author amendment
+`51e8ef2e07503ad936ceb1c91c93baea73176554`. Approved v0.4 spec SHA-256 verified:
+`98c022b6005b1181d54667500dbffba1269678767176a6f544da000fcec11cfc`.
+The version note, amended workspace rule, all of gate 1.2.5, repository AGENTS,
+and host guidance were read. This explicit repository-mode dispatch governs;
+central publication, registry, archival and unrelated documentation changes are
+outside this run. Gates 1.2.1-1.2.4 and the author amendment remain intact.
+
+Data decisions: the current source's parsed style restores every textarea LF to
+uniform CRLF or CR before edits or pastes enter state. LF and mixed sources keep
+LF. Mixed import provenance is retained so typing does not hide the notice.
+Paste stores the restored text as the new baseline; typing leaves that baseline
+unchanged. BOM behavior, operations and the frozen pure module are unchanged.
+
+Architecture: one local `editedSource` helper in `TextTransformer.jsx` serves both
+change and paste paths. The mixed-notice calculation retains memoization.
+`src/pages/About.jsx:21` changes only `{24}` to `{25}`. No separate helper file,
+dependency, configuration, registry or fixture change is needed.
+
+Component validation adds four cases: F4 imported without BOM, caret at the end
+and `c` inserted, yields download `a\r\n\r\nb\r\nc`; F5 plus `c` yields
+`a\r\rbc`; F4 plus pasted `x\ny` restores CRLF throughout the source and its
+baseline (download checked with Collapse disabled to expose every source
+terminator, then checked again after editing and Restore original); edited F12
+retains the mixed-ending notice and downloads `a\n\nb\nc`.
+The component suite passes 14/14 (initial run 10.16 s). Final precommit full suite
+under the pinned npx toolchain passes 66 files / 625 tests in 12.04 s; build
+passes (Vite 1.08 s), emitting 27 route HTML files and 27 sitemap locations.
+The existing large-chunk warning remains; no package or config change was made.
+
+M5, final source and tests, isolated in a `/tmp` archive copy: replacing
+`text: text.replace(/\n/g, model.style)` with `text` exits 1. F4-edit, F5-edit
+and the pasted CRLF source/baseline test fail; 11 other component tests pass.
+F4 receives bytes `[97, 10, 10, 98, 10, 99]` instead of
+`[97, 13, 10, 13, 10, 98, 13, 10, 99]`. Mutation run wall time 11.164 s.
+Scratch source was restored byte for byte before the scratch directory was
+removed. Repository source SHA-256 before and after the mutation run is
+`93ebfb480dd0c948b58b6cd3424fbed0bcfc1a68a99d31cdb75e6f71871ae2f6`.
+No mutation touched the repository source or frozen tests.
+
+Browser validation uses `/opt/agents/venv/bin/python`, Python Playwright 1.64.0,
+`PLAYWRIGHT_BROWSERS_PATH=/opt/agents/data-storage-write/playwright-browsers`,
+Chromium 156.0.8078.4, against `npm run build` output served through pinned
+npx `vite preview --host 127.0.0.1 --port 4175 --strictPort`. Fresh context;
+all requests outside that local origin are aborted and logged. Importing F4,
+focusing Input, pressing Control+End then `c`, waiting for the debounced preview,
+and downloading `transformed.txt` yields exactly these nine bytes:
+`[97, 13, 10, 13, 10, 98, 13, 10, 99]`, hex `610d0a0d0a620d0a63`,
+text `a\r\n\r\nb\r\nc`. Browser run 1.455 s. External aborted-request log
+`[]`; console/page-error log `[]`. No browser binaries were downloaded.
+
+The extended gate-1.2.3 count grep includes About and returns the same five
+permitted hits: README.md:43, the deferred hero alt text; AGENTS.md:108,109,110,112,
+historical June/July 24 archive dates. About's diff contains only its line-21
+number change. `git diff --check` passes. No frozen semantics, fixture, registry,
+package, workflow, configuration, AGENTS/CLAUDE/REVIEW file or case variant is
+changed by this gate. Only the two product files, component test, this worklog
+and the spec status are changed. No repository file is deleted.
+
+Runtime receipts: actual hostname `ml01a`; CLI reports `codex-cli 0.163.0`
+(with the existing read-only PATH-alias warning). The runtime exposes no
+trustworthy executor model identifier here: `unreported`; the requested dispatch
+model is not substituted for a runtime receipt. Default Node/npm are v24.22.0 /
+11.19.1 and are not used as CI parity. The explicit toolchain reports Node
+v22.23.5 and npm 12.0.2. First clock receipt `2026-11-15T15:59:45Z`; qualification
+clock receipt `2026-11-15T16:03:15Z` (3 min 30 s measured interval, not total
+session duration). No other agents or model switches. No operator question,
+credential/token-store read, secret-environment read or gh use occurred.
+
+Exactly one local gate commit is added. History preserves the four earlier gate
+commits, including stopped closeout `6184867`, plus the author amendment
+`51e8ef2`; no history is rewritten. Base/merge-base remains
+`069a9e70aa1b231b6497f04b61f47549f4b1471b`. No push, remote query, PR action,
+issue comment or other GitHub action occurs; network is limited to package
+registries for the toolchain. Primary checkout remains on main and unmodified.
+
+To keep one commit and validate its exact bytes, committed-checkout CI parity
+runs after this seal. The executor handoff carries the enclosing gate SHA and
+that post-commit receipt; this worklog records the completed precommit tests,
+mutation and browser evidence above without claiming a result before it runs.
+The final command is run in a clean detached worktree under `/tmp` of the exact
+enclosing gate commit, without copying or linking node_modules:
+
+```sh
+npx -y -p node@22 -p npm@12.0.2 -- sh -c 'node -v && npm -v && npm ci && npm run test && npm run build'
+```
+
+The temporary worktree is removed afterwards. Task-owned preview processes are
+stopped. Any failed final validation invokes the dispatched stop condition;
+exit status alone is not acceptance. Claude reviews before publication.
+
+## Proposed PR body (v0.4; supersedes the historical held body)
+
+Title: `feat: add local Text Transformer workspace`
+
+Adds tool 25 at `/text-transformer`, with Collapse blank lines enabled on load.
+Ordered operations, preview, Apply/Undo, baseline restore, UTF-8 validation,
+BOM preservation, copy and download keep processing local. Input edits and
+pastes preserve a uniform imported CRLF or CR style; mixed imports retain the
+LF notice. About now says 25 tools. Hero image, alt text and OG card remain
+explicitly deferred to spec 1.1.
+
+Validation: 66 files / 625 tests pass before commit under Node 22.23.5 /
+npm 12.0.2; build emits 27 routes. M1-M4 and the registry deletion were detected
+in the earlier gates; M5 detects the edit/paste regression. Python Playwright
+1.64.0 / Chromium 156.0.8078.4 downloads exact F4 CRLF bytes after a real keypress,
+with zero external requests or browser errors. Earlier gate evidence covers
+keyboard operation, themes, layout, BOM, file rejection and other workspace flows.
+Final clean committed-checkout CI parity is reported in the executor handoff.
+Existing large build chunks remain a warning. Local review by Claude is pending;
+this body is prepared only and has not been published.
+
+Closes #12
+
+## Re-seal after 1.2.5
+
+Re-sealed 2026-11-15 on ml01a with status **complete** for gate implementation;
+spec status is **under-review**. The historical blocked seal above describes the
+prior run and is preserved. The v0.4 authority resolves its scope stop. Final
+committed-checkout validation follows this single gate commit as described above.
+No acceptance, publication, next-spec dispatch or permission to push is implied.

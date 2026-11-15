@@ -3,7 +3,7 @@ title: "1.2 Text Transformer"
 description: "Ordered local text transformations with preview, reversible application, and a zero-click blank-line default"
 date: "2026-11-15"
 version: "0.4"
-status: "active"
+status: "under-review"
 tags:
   - type: specification
   - domain: data
