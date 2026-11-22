@@ -2,8 +2,8 @@
 title: "1.5 Paste BOM fidelity and test reliability"
 description: "Keep an imported UTF-8 BOM through a paste, make the passphrase tests hold for every draw, and apply ASCII Banner results in request order"
 date: "2026-11-22"
-version: "0.2"
-status: "blocked"
+version: "0.3"
+status: "active"
 tags:
   - type: specification
   - domain: testing
@@ -19,6 +19,8 @@ related_documents:
 v0.1 (Claude, 2026-11-22), written under Don's approval "Sounds good. Approved execute. Lets write up the specs for GPT to review." (Action Registry `rec0nqtVcX9OKS6OT`). GPT reviews before dispatch.
 
 v0.2 (Claude, 2026-11-22) applies GPT's review ([worklog](/opt/agents/repos/work-logs/2026-11-22-opstoolbox-worklog-00-next-specs-review.md), R1) and the PR #18 reviews, approved by Don with the rest of the batch ("approved, execute", Action Registry `recqF2TzzUDjAc4su`). Gate 1.5.3 gains deterministic unmount tests and mutation M4: v0.1's ordering tests could pass with a guard that never notices unmount, which is the defect behind #15 (Codex on PR #18 found the same gap). Gate 1.5.1 gains B4 for a select-all paste. The forced-draw proof in 1.5.2 is labelled M2 (Kilo).
+
+v0.3 (Claude, 2026-11-22) resolves the executor's stop at gate 1.5.4 (SD-475). v0.2 assumed ASCII Banner renders in a browser; it does not, in production or in any local build since at least `75ba911`, because figlet's browser build fetches `/fonts/<name>.flf` and nothing serves that path ([#20](https://github.com/vintagedon/ops-toolbox/issues/20)). Fixing font delivery touches `src/lib/asciiBanner.js`, which this spec leaves alone, so it gets its own spec. The banner check now supplies the fonts itself, which still proves what it was for: the request guard does not stop a banner from rendering.
 
 ## Objective
 
@@ -118,7 +120,7 @@ Follow "Executing a Work Spec" in `AGENTS.md`. Push posture: commits stay local,
 **Validation:**
 
 - [ ] In a clean checkout of the final commit under Node 22 / npm 12.0.2, `npm ci`, `npm run test` and `npm run build` pass; `node -v` and `npm -v` are in the worklog.
-- [ ] Playwright, fresh context, every request outside the local preview server aborted and logged: on `/text-transformer`, import the B1 file, paste `XY` at offset 1 through the real clipboard and download; the bytes are `efbbbf61585962630d0a6465660d0a`. On `/ascii-banner`, type `Ops`; the output shows a non-empty banner. No console or page errors; the aborted-request log is empty.
+- [ ] Playwright, fresh context, every request outside the local preview server aborted and logged: on `/text-transformer`, import the B1 file, paste `XY` at offset 1 through the real clipboard and download; the bytes are `efbbbf61585962630d0a6465660d0a`. On `/ascii-banner`, with the preview also serving `node_modules/figlet/fonts/` at `/fonts/` (for example, from a scratch copy of `dist/` with the fonts copied in; production does not, see #20), type `Ops`; the output shows a non-empty banner. Without that font route the output stays empty, which reproduces #20 and shows the check turns on font delivery, not on this spec's change. No console or page errors; the aborted-request log is empty.
 - [ ] `git log main..HEAD` shows one commit per gate (1.5.1 to 1.5.3) plus closeout; nothing was pushed (`git ls-remote origin task/1-5-bom-paste-and-test-reliability` is empty).
 - [ ] The worklog records base commit, gate SHAs, mutation results, soak counts, toolchain versions and the proposed PR body carrying `Closes #N`, `Closes #14` and `Closes #15`, and is sealed.
 
