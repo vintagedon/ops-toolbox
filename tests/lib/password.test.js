@@ -1,6 +1,40 @@
+/**
+ * @file password.test.js
+ * @description Password contracts and wordlist-aware passphrase assertions, including forced hyphenated draws
+ * @license MIT
+ * @see https://github.com/vintagedon/ops-toolbox
+ */
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { generatePassword, calculateEntropy, buildCharset, generatePassphrase, calculatePassphraseEntropy, generateBatch } from '../../src/lib/password.js';
 import { EFF_SHORT_WORDLIST } from '../../src/lib/wordlist.js';
+
+
+// Match complete list entries with an exact word count; a word may contain '-'.
+function expectDefaultPassphrase(result, count, capitalize = false) {
+  const alternatives = EFF_SHORT_WORDLIST.map(word => {
+    const value = capitalize ? word[0].toUpperCase() + word.slice(1) : word;
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }).join('|');
+  const word = `(?:${alternatives})`;
+  expect(result).toMatch(new RegExp(`^${word}(?:-${word}){${count - 1}}$`));
+}
+
+// Run each repaired assertion under both real randomness and the #14 reproducer.
+function drawPassphrase(draw, count, separator = '-', capitalize = false) {
+  if (draw === 'random') return generatePassphrase(count, separator, capitalize);
+  const index = EFF_SHORT_WORDLIST.indexOf('yo-yo');
+  expect(index).toBeGreaterThanOrEqual(0);
+  const stub = vi.spyOn(window.crypto, 'getRandomValues')
+    .mockImplementation(array => array.fill(index));
+  try {
+    const result = generatePassphrase(count, separator, capitalize);
+    expect(stub).toHaveBeenCalledWith(expect.any(Uint32Array));
+    expect(result).toBe(Array(count).fill(capitalize ? 'Yo-yo' : 'yo-yo').join(separator));
+    return result;
+  } finally {
+    stub.mockRestore();
+  }
+}
 
 describe('Password Generator', () => {
   beforeEach(() => {
@@ -151,23 +185,19 @@ describe('generatePassphrase', () => {
   beforeEach(() => {
     vi.unstubAllGlobals();
   });
-  it('returns string with correct number of words split by default separator', () => {
-    const result = generatePassphrase(6);
-    expect(result.split('-')).toHaveLength(6);
+  it.each(['random', 'yo-yo'])('returns string with correct number of words split by default separator (%s)', draw => {
+    const result = drawPassphrase(draw, 6);
+    expectDefaultPassphrase(result, 6);
   });
 
-  it('default separator is hyphen', () => {
-    const result = generatePassphrase(4);
-    const parts = result.split('-');
-    expect(parts).toHaveLength(4);
+  it.each(['random', 'yo-yo'])('default separator is hyphen (%s)', draw => {
+    const result = drawPassphrase(draw, 4);
+    expectDefaultPassphrase(result, 4);
   });
 
-  it('capitalize option capitalizes first letter of each word', () => {
-    const result = generatePassphrase(4, '-', true);
-    const words = result.split('-');
-    words.forEach(word => {
-      expect(word[0]).toBe(word[0].toUpperCase());
-    });
+  it.each(['random', 'yo-yo'])('capitalize option capitalizes first letter of each word (%s)', draw => {
+    const result = drawPassphrase(draw, 4, '-', true);
+    expectDefaultPassphrase(result, 4, true);
   });
 
   it('custom separator works', () => {
@@ -333,30 +363,24 @@ describe('generatePassword — rejection sampling', () => {
 });
 
 describe('generatePassphrase — rejection sampling', () => {
-  it('generates correct number of words split by separator', () => {
-    const result = generatePassphrase(6);
-    expect(result.split('-')).toHaveLength(6);
+  it.each(['random', 'yo-yo'])('generates correct number of words split by separator (%s)', draw => {
+    const result = drawPassphrase(draw, 6);
+    expectDefaultPassphrase(result, 6);
   });
 
-  it('all words in output exist in EFF_SHORT_WORDLIST', () => {
-    const result = generatePassphrase(8);
-    const words = result.split('-');
-    for (const word of words) {
-      expect(EFF_SHORT_WORDLIST).toContain(word);
-    }
+  it.each(['random', 'yo-yo'])('all words in output exist in EFF_SHORT_WORDLIST (%s)', draw => {
+    const result = drawPassphrase(draw, 8);
+    expectDefaultPassphrase(result, 8);
   });
 
-  it('default separator is hyphen', () => {
-    const result = generatePassphrase(4);
-    expect(result.split('-')).toHaveLength(4);
+  it.each(['random', 'yo-yo'])('default separator is hyphen (%s)', draw => {
+    const result = drawPassphrase(draw, 4);
+    expectDefaultPassphrase(result, 4);
   });
 
-  it('capitalize option capitalizes first letter of each word', () => {
-    const result = generatePassphrase(4, '-', true);
-    const words = result.split('-');
-    for (const word of words) {
-      expect(word[0]).toBe(word[0].toUpperCase());
-    }
+  it.each(['random', 'yo-yo'])('capitalize option capitalizes first letter of each word (%s)', draw => {
+    const result = drawPassphrase(draw, 4, '-', true);
+    expectDefaultPassphrase(result, 4, true);
   });
 
   it('custom separator works', () => {

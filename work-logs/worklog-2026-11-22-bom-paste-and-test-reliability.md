@@ -162,3 +162,45 @@ one line changed inside `paste()` only. This checkpoint amends only the gate's
 worklog after testing; source/tests are identical to the qualified candidate.
 Git needed normal host execution because the sandbox mounted linked-worktree
 metadata read-only; escalation was approved. No permission denial was bypassed.
+
+### Gate 1.5.2 checkpoint
+
+Gate 1.5.1 sealed commit: `9723bff38f03da115b84c3161d617e41337683ad`.
+Data decision: match complete EFF Short entries using an anchored expression
+with exact repetition counts, retaining internal hyphens. Capitalized assertions
+build alternatives by uppercasing the first character of each full word.
+All seven tests run twice: real draws, and a scoped `window.crypto.getRandomValues`
+spy filling each typed array with `EFF_SHORT_WORDLIST.indexOf('yo-yo')`.
+The forced cases also require the exact repeated `yo-yo` or `Yo-yo` output.
+The spy is restored in `finally`. No product logic or wordlists change.
+
+| Changed test (suite / name) | Exact parsing contract |
+|---|---|
+| generatePassphrase / returns string with correct number of words split by default separator | 6 full list entries joined by hyphens |
+| generatePassphrase / default separator is hyphen | 4 full list entries joined by hyphens |
+| generatePassphrase / capitalize option capitalizes first letter of each word | 4 capitalized full list entries joined by hyphens |
+| rejection sampling / generates correct number of words split by separator | 6 full list entries joined by hyphens |
+| rejection sampling / all words in output exist in EFF_SHORT_WORDLIST | 8 full list entries joined by hyphens |
+| rejection sampling / default separator is hyphen | 4 full list entries joined by hyphens |
+| rejection sampling / capitalize option capitalizes first letter of each word | 4 capitalized full list entries joined by hyphens |
+
+Remaining hyphen splits use only the supplied list `['alpha', 'bravo']`; dot
+splits use the default list, whose entries contain no dot. Neither is vulnerable
+to internal hyphens. Clean gate checkout validation, M2 and 100 consecutive
+password test runs will follow; no retries or relaxed assertions.
+
+Gate 1.5.2 validation: clean candidate `59929ea`, Node `v22.23.5`, npm
+`12.0.2`; `npm ci` passed (375 packages, 0 vulnerabilities). Password suite
+passed 55/55 (701 ms), including all seven forced-draw variants with capitalization
+covered. M2 replaced only the scratch test file with `main`'s version plus the
+same index-filling spy scoped to the two parsing suites. All seven original
+tests listed above failed: 6 words split into 12 pieces, 4 into 8, membership
+reported `yo` absent, and both capitalization tests compared `y` to `Y`.
+M2 exited 1, 1.616 s; scratch file restored byte for byte, SHA-256
+`8d533d64de851194c182050e3d27907a7e0380bd55541253c71416630440060c`.
+The `-t` selection ran the seven original tests only; no committed skip/retry.
+Supporting soak: 100 consecutive separate `npm run test -- tests/lib/password.test.js`
+processes under the pinned npx toolchain, all exit 0, 55/55 each, no unhandled
+errors, elapsed 92.444 s. The runner stops immediately on any failure.
+`git diff main --stat -- src/lib/` is empty. This worklog-only amendment leaves
+qualified test/source bytes identical to the candidate.
