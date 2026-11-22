@@ -20,9 +20,15 @@ are proposed defaults for review. Spec numbers identify work, not a product vers
 |---|---|---|---|
 | 1 | [1.0 Dependency maintenance](spec-m1-0-dependency-maintenance.md) | Qualify major upgrades left after compatible closeout fixes | Merged ([#13](https://github.com/vintagedon/ops-toolbox/pull/13), `069a9e7`); D1 and W1 to W3 in its [review document](reviews/review-m1-0-dependency-maintenance.md) await the operator |
 | 2 | [1.2 Text Transformer](spec-m1-2-text-transformer.md) | Ordered text operations with original/input/preview and safe file handling | Merged ([#16](https://github.com/vintagedon/ops-toolbox/pull/16), `6262e00`) at spec v0.6 |
-| 3 | [1.1 Sentinel workspace](spec-m1-1-sentinel-workspace.md) | Persistent navigation, useful front page, coherent themes and capability filters | v0.3 draft; waits on Sentinel spec 09 (Ember and Sea) |
-| 4 | [1.3 Cloud subnet planner](spec-m1-3-cloud-subnet-planner.md) | Local provider-aware IPv4 planning, visual map and reusable exports | v0.1 draft |
+| 3 | [1.5 Paste BOM fidelity and test reliability](spec-m1-5-bom-paste-and-test-reliability.md) | Imported BOM survives a paste; passphrase and ASCII Banner tests stop flaking (#14, #15) | v0.1, GPT review (2026-11-22) |
+| 4 | [1.1 Sentinel workspace](spec-m1-1-sentinel-workspace.md) | Persistent navigation, useful front page, coherent themes and capability filters | v0.3 draft; waits on Sentinel spec 09 and its amendment 09a (review corrections) |
 | 5 | [1.4 Release editions](spec-m1-4-release-editions.md) | One codebase, full and air-gapped artifacts, first connected DNS tool | v0.2 draft; editions and DNS Lookup decided; needs hardening |
+| 6 | [1.3 Cloud subnet planner](spec-m1-3-cloud-subnet-planner.md) | Local provider-aware IPv4 planning, visual map and reusable exports | v0.1 draft |
+
+Next queue (proposed by Claude, agreed by Don, 2026-11-22): 1.5 first; then 1.1 once Sentinel 09 merges; then
+1.4 ahead of 1.3, because the editions decide how later tools ship. Spec 1.6 (CI
+workflow: the corrected W1 to W3 from 1.0's review and a Docker image build that
+closes D1) is not yet written; it needs Don's explicit workflow approval.
 
 Triad review (Claude, 2026-11-15) hardened 1.0 and 1.2 for dispatch after GPT
 review and carried its findings into 1.1. The November 4 central blank line
