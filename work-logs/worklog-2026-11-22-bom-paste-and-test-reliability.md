@@ -1,18 +1,18 @@
 ---
 title: "Worklog — 1.5 Paste BOM fidelity and test reliability"
 spec: "docs/specs/spec-m1-5-bom-paste-and-test-reliability.md"
-status: "blocked"
+status: "completed"
 started: "2026-11-22"
-finished: "2026-11-22T02:07:40-05:00"
+finished: "2026-11-22T08:06:30Z"
 executor:
   model: "unreported"
   runtime: "codex-cli 0.163.0"
-  duration: "Total session duration unavailable; recorded clock samples span 16 seconds"
+  duration: "Total session duration unavailable; current resume clock samples 07:59:42Z–08:06:30Z span 408 seconds"
 git:
   repo: "/opt/agents/repos/ops-toolbox-task-1-5"
   branch: "task/1-5-bom-paste-and-test-reliability"
   base: "a265781fd244851f0a0edf1af21bd3483f88fceb"
-  commit: "Documentation-only stop checkpoint; resolve via git log for this file"
+  commit: "Final 1.5.4 documentation closeout; resolve via git log -1 --format=%H for this file"
 publication:
   status: "pending"
   ref: "Local branch only; no PR created or updated"
@@ -391,3 +391,222 @@ Resumed-run final clock sample: `2026-11-22T02:21:51-05:00`.
 Measured clock-sample interval from 02:09:59: 712.909 s; this is
 not a claimed full session duration. Final status: **blocked** at 1.5.4.
 This resumed-run record is sealed. The original sealed stop remains above.
+
+
+## Resume — opstoolbox15c-codex-20261122T075915Z-fb2aa0
+
+### Authority and preserved history
+
+Resume gate **1.5.4 only** under the explicit operator dispatch and Don's
+2026-11-22 01:34 America/New_York approval, Action Registry
+`recqF2TzzUDjAc4su`. Claude amended the spec to v0.3 at
+`b16083c3a0f55f15419c68b55d03738bfaed76e8` (SD-475). Verified its SHA-256:
+`8308b002c632cb7be5f9e3d07434abc42da8183f4aaccb03d2c87e61d9afdc15`.
+The two earlier sealed stop records above remain historical and unchanged in
+body; this resume supersedes their blocked outcome. Gates 1.5.1–1.5.3 were
+reviewed and reproduced by Claude per dispatch. No implementation gate,
+mutation or soak was rerun in this resume; their inline evidence and gate SHAs
+above stand. The top-level frontmatter now describes the completed spec run.
+
+Read the full v0.3 spec, repository and workspace AGENTS.md, spec index, host
+instructions/contract, local lifecycle skills and worklog template. The explicit
+Modify list and no-publication instruction govern over broader lifecycle
+registry, archive and publication procedures. No central record or index was
+modified. `docs/specs/README.md` still describes v0.2 dispatch; updating that
+out-of-scope index is proposed for the operator's documentation pass.
+
+Observed `hostname`: `ml01a`; `id -un`: `crainbramp`; `codex --version`:
+`codex-cli 0.163.0` (it warned PATH aliases could not be created on a read-only
+filesystem; no workaround). Exact active model is not reported by the runtime
+available to this session, so it remains **unreported**; the dispatch's
+`gpt-6.1-sol` / high is supplied metadata, not a measured runtime fact. No model
+switch, agent spawn, secret/auth-file/token-store read or `gh` use occurred.
+First measured UTC clock sample: `2026-11-22T07:59:42Z`.
+
+Starting branch was clean at `b16083c3a0f55f15419c68b55d03738bfaed76e8`.
+`git merge-base main HEAD` remains
+`a265781fd244851f0a0edf1af21bd3483f88fceb`. Read-only checks confirm the
+primary checkout remains on `main` at that SHA; it was not switched or modified.
+
+### Gate 1.5.4 — clean-checkout qualification
+
+Created `/tmp/opstoolbox15c-g4` using `git worktree add --detach` at
+`b16083c3a0f55f15419c68b55d03738bfaed76e8`. Its initial
+`git status --porcelain` was empty. Command prefix for every npm/Node operation:
+`npx -y -p node@22 -p npm@12.0.2 --`. Actual `node -v`: **v22.23.5**;
+actual `npm -v`: **12.0.2**. The host-default toolchain is not used for parity.
+
+| Command | Result | Measured process time |
+|---|---|---|
+| `npm ci` | Exit 0; 375 added packages, 0 vulnerabilities | 3.074 s |
+| `npm run test` | Exit 0; 66 files, 648 tests passed; no unhandled errors | 15.669 s |
+| `npm run build` | Exit 0; 27 prerendered routes and sitemap entries | 2.011 s |
+
+Vitest's reported test duration was 14.68 s. The build retained the existing
+>500 kB chunk advisory. No package, Vite or Vitest configuration changed.
+The closeout commit adds only this worklog and spec status/checklist changes to
+the qualified commit. The same clean-checkout install/test/build sequence is
+also required on that resulting commit before handoff; its exact SHA and final
+verification result accompany the operator report. Any documentation amendment
+is followed by qualification of the resulting commit before handoff.
+
+### Browser qualification under v0.3
+
+Used `/opt/agents/venv/bin/python`, Python Playwright **1.64.0** and
+`PLAYWRIGHT_BROWSERS_PATH=/opt/agents/data-storage-write/playwright-browsers`.
+Installed Chromium headless shell 1248 reported browser **156.0.8078.4**;
+no browser download or shared-cache modification. Each qualified origin used a
+fresh context, service workers blocked, clipboard-read/write permission and a
+context route allowing only that exact local preview origin. Requests elsewhere
+would be aborted and logged; both qualified contexts recorded `[]`.
+
+Original build command:
+`npx -y -p node@22 -p npm@12.0.2 -- npx vite preview --host 127.0.0.1 --port 4195 --strictPort`.
+Font-backed preview command used the same prefix with
+`npx vite preview --outDir /tmp/opstoolbox15c-with-fonts --host 127.0.0.1 --port 4176 --strictPort`.
+The scratch directory is a copy of the qualified `dist/` plus the installed
+`node_modules/figlet/fonts/` at `/fonts/` (332 `.flf` files). No font asset or
+product file was changed. Both preview responses were verified against the
+build's SPA `index.html` (SHA-256
+`e2153b05f7f156740094b262d72117fc8ea3329a8492acf59e198f24ace048b0`).
+
+- On `/text-transformer`, imported `efbbbf6162630d0a6465660d0a`, wrote `XY`
+  through `navigator.clipboard.writeText`, focused Input at `[1,1]`, and pressed
+  real `Control+V`. Waited for input `aXYbc\ndef\n` and `Preview is current.`;
+  Download .txt yielded **`efbbbf61585962630d0a6465660d0a`**, exactly B1.
+- Without the font route, `/ascii-banner` with `Ops` remained at
+  `Output will appear here…`, **0 lines / 0 characters**, after the bad font
+  response and debounce settled. Two `/fonts/Standard.flf` responses were HTTP
+  200 with `text/html` and `<!DOCTYPE html>` content. This reproduces **#20**.
+- With the font route, `/fonts/Standard.flf` returned HTTP 200 with the real
+  `flf2a$ 6 5 16 15 13 0 24` header. After the 300 ms debounce, `Ops` produced
+  a **113-character, six-line** banner. The check waits for trimmed nonblank
+  output that differs from the placeholder before reading and asserting it.
+- Console errors, page errors and aborted external requests were **`[]` in
+  each qualified context**. Clipboard/no-font observation elapsed 3.887 s as
+  part of the recorded partial harness process; the corrected font-backed
+  observation passed in 1.147 s.
+
+Harness setup and timing errors are retained, not presented as product passes:
+
+1. The initial preview on port 4175 failed to bind (`Port 4175 is already in
+   use`). The browser reached the unrelated listener, logged one HTTP 404
+   console error and timed out waiting for the file input, before any import
+   or product assertion (30.767 s, exit 1). The unrelated listener was left
+   untouched. Port selection is not frozen by the spec; port 4195 was used
+   after confirming Vite startup and matching the served build.
+2. A setup fingerprint initially compared the preview SPA response to the
+   prerendered per-route HTML and failed. Vite preview serves `dist/index.html`
+   for the extensionless route, whose metadata differs. Corrected the setup
+   comparison to the actual SPA entry. An inadvertently started old-origin
+   harness process was interrupted (exit 130) before qualification proceeded.
+3. After clipboard/no-font assertions passed on the correct build, the first
+   font-backed harness read `<pre>` as soon as its placeholder disappeared.
+   Figlet's initial empty-input result is whitespace, so the immediate
+   `banner.strip()` assertion failed before `Ops` finished debouncing. The
+   corrected harness waits for actual nonblank output and then makes the same
+   non-empty assertion in a fresh font-backed context. That case passed; the
+   already-passed clipboard/no-font cases were not repeated.
+
+These are explicit harness corrections, not product changes or configured test
+retries. No Vitest failure was rerun, no error was suppressed, and no spec
+validation or assertion was skipped or weakened. The observed browser setup
+failures are not acceptance evidence. A preliminary tool-call syntax error
+occurred before its shell command executed and had no filesystem/test effect.
+
+### History, scope and publication checks
+
+`git log --format='%H %s' main..HEAD` at resume confirms exactly the three
+implementation gate commits and the preserved checkpoints:
+
+| Record | SHA |
+|---|---|
+| Base | `a265781fd244851f0a0edf1af21bd3483f88fceb` |
+| Original dispatch stop | `6df5981641c2d52ea5e836909623fa24d94c1dc9` |
+| Gate 1.5.1 | `9723bff38f03da115b84c3161d617e41337683ad` |
+| Gate 1.5.2 | `37a103b65b60b7dd2c642c7746c4a9cf20d90b51` |
+| Gate 1.5.3 | `2adf741479934471b3c897ddcc3fb7cf4aa7c862` |
+| Preserved v0.2 blocked closeout | `dcccb7f996139db20cf59271a1ac3b2f83cde5d9` |
+| Claude's v0.3 amendment | `b16083c3a0f55f15419c68b55d03738bfaed76e8` |
+| Gate 1.5.4 complete closeout | Resolve with `git log -1 --format=%H -- work-logs/worklog-2026-11-22-bom-paste-and-test-reliability.md`; final report supplies SHA |
+
+This resume adds one closeout commit referencing **1.5.4**. The prior stops and
+amendment are intentional history, not additional implementation gates; no
+history rewrite or extra source/test commit. `git ls-remote origin
+task/1-5-bom-paste-and-test-reliability` exited 0 with **empty output**, including
+at `2026-11-22T08:04:29Z`. Nothing was pushed. No GitHub write, PR creation or
+update, issue comment, ready action or merge was attempted.
+
+Only the spec and this worklog changed in this resume. Against main, the
+source changes still lie solely inside `TextTransformer.paste()` and the
+AsciiBanner generation effect; the three authorized test files are the only
+test changes. Protected-path comparisons are empty for `src/lib/`, packages,
+Vite/Vitest config, workflows and instruction files/case variants. No repository
+file was deleted, moved, archived or recycled. The fonts-distribution repair
+remains out of scope under #20; no implementation is proposed beyond v0.3's
+existing follow-up. No other spec, primary checkout or central registry changed.
+
+### Proposed PR body — for Claude's local review
+
+Preserve an imported UTF-8 BOM when pasting into Text Transformer, including
+select-all replacement. Parse complete EFF Short wordlist entries in all seven
+passphrase tests and force `yo-yo` / `Yo-yo` draws. Ignore ASCII Banner results
+after effect cleanup so obsolete requests and unmounted components cannot
+update output.
+
+Validation: B1–B4, forced draws, A1/A2/U1/U2 and mutations M1–M4 passed.
+Supporting Node 22 / npm 12.0.2 soaks: 100 password suites, 50 banner suites and
+five full suites passed. Clean-checkout qualification passed 648 tests and the
+production build. Python Playwright 1.64.0 confirmed the exact BOM/CRLF download
+through the real clipboard and a 113-character `Ops` banner with locally served
+figlet fonts. Without `/fonts/`, the banner stays empty, reproducing existing
+#20; production font delivery is unchanged. Qualified contexts had no console or
+page errors and no external requests. Browser harness setup/timing corrections
+are recorded in the worklog.
+
+The branch is local and awaits Claude's review. No publication or CI acceptance
+is claimed.
+
+Closes #19
+
+Closes #14
+
+Closes #15
+
+### Seal and handoff
+
+Gate 1.5.4's v0.3 checks are complete. Spec status is **under-review**; executor
+completion is not reviewer acceptance. No operator question was put during this
+resume. Claude reviews the local branch before any publication. Proposed PR body
+is above; it was not sent anywhere.
+
+Ctrl-C stopped the two npm preview wrappers (intentional exit 130), but a socket
+check found their Vite child processes still listening. Approved normal-host
+execution identified only ports 4195/4176, verified both listeners had the scratch
+worktree as cwd and the expected `vite preview` commands, and stopped those two
+children with SIGTERM. Both ports then verified closed. Browser contexts/processes
+closed; the unrelated port-4175 listener was not changed. The scratch validation
+worktree was removed with `git worktree remove --force` after clean tracked-status
+verification, and the scratch font-backed copy was removed. No repository file
+was deleted. A sandbox read-only Git-index error during staging was resolved by
+approved normal-host execution for the authorized local commit; no automatic
+approval rejection occurred and no restriction was bypassed.
+
+The first closeout candidate, `2c0efc4271c4031bfcf31eb29597e52354752e34`,
+received a second clean-checkout parity sequence at that exact commit: Node
+`v22.23.5`, npm `12.0.2`; `npm ci` exit 0 (375 packages, 0 vulnerabilities,
+3.210 s), `npm run test` exit 0 (66 files / 648 tests, no unhandled errors,
+15.207 s), and `npm run build` exit 0 (27 routes, 2.015 s). This worklog-only
+amendment records those actual results and the verified child-process cleanup;
+the resulting final commit is checked in another clean scratch checkout before
+handoff, then removed with `git worktree remove`. It introduces no source/test
+change. This is final-commit qualification, not retrying a failed test.
+`/tmp/opstoolbox15c-evidence/` contains supplementary **ml01a-local, untracked,
+disposable** commands/logs/JSON/scripts, including the invalid-origin and premature
+read records. All material results are inline above; no claim relies only on
+scratch files.
+
+Seal clock sample: **2026-11-22T08:06:30Z**; measured interval from the first
+sample is **408 s**, not a claimed entire-session duration. Individual command
+and browser timings are measured above; token/cost data are unavailable.
+This completed resume is sealed. Prior sealed stop narratives remain above.

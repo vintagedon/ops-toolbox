@@ -3,7 +3,7 @@ title: "1.5 Paste BOM fidelity and test reliability"
 description: "Keep an imported UTF-8 BOM through a paste, make the passphrase tests hold for every draw, and apply ASCII Banner results in request order"
 date: "2026-11-22"
 version: "0.3"
-status: "active"
+status: "under-review"
 tags:
   - type: specification
   - domain: testing
@@ -119,10 +119,10 @@ Follow "Executing a Work Spec" in `AGENTS.md`. Push posture: commits stay local,
 
 **Validation:**
 
-- [ ] In a clean checkout of the final commit under Node 22 / npm 12.0.2, `npm ci`, `npm run test` and `npm run build` pass; `node -v` and `npm -v` are in the worklog.
-- [ ] Playwright, fresh context, every request outside the local preview server aborted and logged: on `/text-transformer`, import the B1 file, paste `XY` at offset 1 through the real clipboard and download; the bytes are `efbbbf61585962630d0a6465660d0a`. On `/ascii-banner`, with the preview also serving `node_modules/figlet/fonts/` at `/fonts/` (for example, from a scratch copy of `dist/` with the fonts copied in; production does not, see #20), type `Ops`; the output shows a non-empty banner. Without that font route the output stays empty, which reproduces #20 and shows the check turns on font delivery, not on this spec's change. No console or page errors; the aborted-request log is empty.
-- [ ] `git log main..HEAD` shows one commit per gate (1.5.1 to 1.5.3) plus closeout; nothing was pushed (`git ls-remote origin task/1-5-bom-paste-and-test-reliability` is empty).
-- [ ] The worklog records base commit, gate SHAs, mutation results, soak counts, toolchain versions and the proposed PR body carrying `Closes #N`, `Closes #14` and `Closes #15`, and is sealed.
+- [x] In a clean checkout of the final commit under Node 22 / npm 12.0.2, `npm ci`, `npm run test` and `npm run build` pass; `node -v` and `npm -v` are in the worklog.
+- [x] Playwright, fresh context, every request outside the local preview server aborted and logged: on `/text-transformer`, import the B1 file, paste `XY` at offset 1 through the real clipboard and download; the bytes are `efbbbf61585962630d0a6465660d0a`. On `/ascii-banner`, with the preview also serving `node_modules/figlet/fonts/` at `/fonts/` (for example, from a scratch copy of `dist/` with the fonts copied in; production does not, see #20), type `Ops`; the output shows a non-empty banner. Without that font route the output stays empty, which reproduces #20 and shows the check turns on font delivery, not on this spec's change. No console or page errors; the aborted-request log is empty.
+- [x] `git log main..HEAD` shows one commit per gate (1.5.1 to 1.5.3) plus closeout; nothing was pushed (`git ls-remote origin task/1-5-bom-paste-and-test-reliability` is empty).
+- [x] The worklog records base commit, gate SHAs, mutation results, soak counts, toolchain versions and the proposed PR body carrying `Closes #N`, `Closes #14` and `Closes #15`, and is sealed.
 
 ## Constraints
 
@@ -146,11 +146,16 @@ The PR merges after Claude's review, CI, and the Kilo and Codex reviews. Spec 1.
 
 ## Execution status — 2026-11-22
 
-Gates 1.5.1–1.5.3 passed, including M1–M4 and all required soaks.
-Gate 1.5.4 stopped at the production browser validation: the real clipboard
-B1 download matched the required bytes, but `Ops` rendered no ASCII banner.
-`/fonts/Standard.flf` returned HTML; the font is absent from the build.
-The font-loading/distribution fix exceeds Modify and the library/fonts are
-explicitly Do not touch. No validation was changed and no fix was attempted.
-See [the sealed worklog](../../work-logs/worklog-2026-11-22-bom-paste-and-test-reliability.md)
-for measured results, the retained original stop and the new scope boundary.
+Gates 1.5.1–1.5.3 passed, including M1–M4 and all required soaks; their
+commits stand unchanged. Gate 1.5.4 qualification passed under v0.3: Node 22 /
+npm 12.0.2 clean-checkout install, 648 tests and production build; real clipboard
+B1 download; non-empty `Ops` banner when the scratch preview serves figlet fonts;
+and the empty result without that route, reproducing #20. Browser error and
+aborted external-request logs are empty for the qualified contexts.
+
+The earlier preflight and v0.2 browser stops remain in local history and in
+[the sealed worklog](../../work-logs/worklog-2026-11-22-bom-paste-and-test-reliability.md),
+which records the qualification evidence, harness setup corrections and proposed
+PR body. No font-distribution fix or other out-of-scope change was made.
+The branch remains local with no remote branch; status is **under-review** for
+Claude's review, not acceptance or publication.
