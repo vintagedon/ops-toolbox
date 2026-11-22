@@ -2,7 +2,7 @@
 title: "1.3 Cloud subnet planner"
 description: "Local IPv4 planning with provider rules, a visual address map and exports"
 date: "2026-11-14"
-version: "0.1"
+version: "0.2"
 status: "draft"
 tags:
   - type: specification
@@ -10,6 +10,8 @@ tags:
 ---
 
 # 1.3 Cloud subnet planner
+
+v0.2 (Claude, 2026-11-22, batch approval `recqF2TzzUDjAc4su`): 1.3 now runs after 1.4, so the planner joins editions that already exist. Gate 5 admits it to both and qualifies it there.
 
 ## Outcome and boundary
 
@@ -78,3 +80,9 @@ Reject invalid/overlapping/out-of-parent leaves and files over 2 MiB before muta
 4. **Qualification.** Full tests/build; JSON round trip, malformed import leaves
    state intact, CSV hostile-note fixture, SVG open outside the app, printed table
    readability, keyboard use, large tree and disconnected runtime checks.
+5. **Edition qualification.** Spec 1.4's full and air-gapped editions exist by now.
+   Admit the planner to both through the registry (local processing, offline capable)
+   and rerun 1.4's edition checks with it: the air-gapped build contains its route and
+   chunks, its imports, exports and map work in the browser check that rejects every
+   request outside the local server, and generated counts and discovery metadata
+   match each edition's registry.

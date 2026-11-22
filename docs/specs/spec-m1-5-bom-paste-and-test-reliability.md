@@ -2,8 +2,8 @@
 title: "1.5 Paste BOM fidelity and test reliability"
 description: "Keep an imported UTF-8 BOM through a paste, make the passphrase tests hold for every draw, and apply ASCII Banner results in request order"
 date: "2026-11-22"
-version: "0.1"
-status: "under-review"
+version: "0.2"
+status: "active"
 tags:
   - type: specification
   - domain: testing
@@ -17,6 +17,8 @@ related_documents:
 # 1.5 Paste BOM fidelity and test reliability
 
 v0.1 (Claude, 2026-11-22), written under Don's approval "Sounds good. Approved execute. Lets write up the specs for GPT to review." (Action Registry `rec0nqtVcX9OKS6OT`). GPT reviews before dispatch.
+
+v0.2 (Claude, 2026-11-22) applies GPT's review ([worklog](/opt/agents/repos/work-logs/2026-11-22-opstoolbox-worklog-00-next-specs-review.md), R1) and the PR #18 reviews, approved by Don with the rest of the batch ("approved, execute", Action Registry `recqF2TzzUDjAc4su`). Gate 1.5.3 gains deterministic unmount tests and mutation M4: v0.1's ordering tests could pass with a guard that never notices unmount, which is the defect behind #15 (Codex on PR #18 found the same gap). Gate 1.5.1 gains B4 for a select-all paste. The forced-draw proof in 1.5.2 is labelled M2 (Kilo).
 
 ## Objective
 
@@ -78,6 +80,7 @@ A paste keeps the current source's BOM state, as typing does. Only a file import
 - [ ] Component test B1: import a file whose bytes are `EF BB BF` + `abc\r\ndef\r\n`, place the caret at offset 1, paste `XY`, wait for the debounce, Download. The bytes are `efbbbf61585962630d0a6465660d0a` (hex).
 - [ ] Component test B2: the same file without the BOM and the same paste give `61585962630d0a6465660d0a`. A paste never adds a BOM.
 - [ ] Component test B3: after B1's paste, type `z` at the end, choose Restore original and confirm. The download starts with `efbbbf` and equals the pasted baseline.
+- [ ] Component test B4: import the B1 file, select all of Input and paste `fresh`; the download is `efbbbf` followed by `fresh`. A select-all paste replaces the text, not the file's BOM.
 - [ ] Mutation M1: put `bom: false` back in `paste()` in a scratch copy; B1 fails. Restore byte for byte.
 - [ ] The existing BOM + F4 import and download test passes unchanged.
 - [ ] `git diff main -- src/tools/TextTransformer.jsx` changes lines inside `paste()` only.
@@ -89,7 +92,7 @@ Every test that parses a generated passphrase holds for every word in the list i
 **Validation:**
 
 - [ ] A committed test stubs `window.crypto.getRandomValues` so every draw selects `yo-yo`'s index in `EFF_SHORT_WORDLIST`, with and without `capitalize`, and the rewritten assertions pass under it.
-- [ ] The same stub applied to the `main` versions of the seven tests, in a scratch copy, makes at least one of them fail. The worklog names which. This proves the stub reproduces #14.
+- [ ] Mutation M2: the same stub applied to the `main` versions of the seven tests, in a scratch copy, makes at least one of them fail. The worklog names which. This proves the stub reproduces #14.
 - [ ] The worklog lists each changed test and how it now parses the passphrase; none splits or counts a default-list passphrase in a way a word containing the separator can break.
 - [ ] `git diff main --stat -- src/lib/` is empty.
 - [ ] Supporting soak, not a substitute for the forced draw: `tests/lib/password.test.js` runs 100 consecutive times under the Node 22 toolchain, and every run exits 0.
@@ -102,7 +105,9 @@ ASCII Banner applies a result, success or failure, only when it belongs to the l
 
 - [ ] Component test A1, with `generateBanner` mocked to return promises the test settles: request R1 (text `one`), then R2 (text `two`); settle R2, then R1. The output shows R2's result.
 - [ ] Component test A2: R2 resolves, then R1 rejects. The output still shows R2's result; the stale rejection does not clear it.
-- [ ] Mutation M3: remove the guard in a scratch copy; A1 and A2 fail. Restore byte for byte.
+- [ ] Component tests U1 and U2: start a request, unmount the component while that latest request is still pending, then resolve it (U1) or reject it (U2). Each test fails if the settled result reaches component state after unmount, and passes with the guard.
+- [ ] Mutation M3: remove the guard in a scratch copy; A1, A2, U1 and U2 fail. Restore byte for byte.
+- [ ] Mutation M4: replace the guard, in a scratch copy, with one that tracks request order but ignores unmount (for example, a request counter that advances only when a request starts). A1 and A2 still pass; U1 and U2 fail. This proves the unmount tests cover what the ordering tests cannot. Restore byte for byte.
 - [ ] The seven existing AsciiBanner tests pass unchanged.
 - [ ] Supporting soak: `tests/tools/AsciiBanner.test.jsx` runs 50 consecutive times and the full suite 5 consecutive times under the Node 22 toolchain; every run exits 0 and Vitest reports no unhandled errors.
 
@@ -126,7 +131,7 @@ Follow "Executing a Work Spec" in `AGENTS.md`. Push posture: commits stay local,
 
 ## What the executor may choose
 
-Test organization, stub helpers, how tests parse a passphrase (assertions on the generated words, an anchored pattern built from the list, or another exact method), the guard mechanism (a flag, a request counter or an `AbortController`), and worklog wording.
+Test organization, stub helpers, how U1 and U2 detect a state update after unmount (for example, a test-only wrapper around the component's state setter), how tests parse a passphrase (assertions on the generated words, an anchored pattern built from the list, or another exact method), the guard mechanism (a flag, a request counter or an `AbortController`), and worklog wording.
 
 Frozen: the BOM rule, the expected bytes, the do-not-touch list, the no-retry and no-suppression rules, and the validations.
 

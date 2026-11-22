@@ -20,15 +20,18 @@ are proposed defaults for review. Spec numbers identify work, not a product vers
 |---|---|---|---|
 | 1 | [1.0 Dependency maintenance](spec-m1-0-dependency-maintenance.md) | Qualify major upgrades left after compatible closeout fixes | Merged ([#13](https://github.com/vintagedon/ops-toolbox/pull/13), `069a9e7`); D1 and W1 to W3 in its [review document](reviews/review-m1-0-dependency-maintenance.md) await the operator |
 | 2 | [1.2 Text Transformer](spec-m1-2-text-transformer.md) | Ordered text operations with original/input/preview and safe file handling | Merged ([#16](https://github.com/vintagedon/ops-toolbox/pull/16), `6262e00`) at spec v0.6 |
-| 3 | [1.5 Paste BOM fidelity and test reliability](spec-m1-5-bom-paste-and-test-reliability.md) | Imported BOM survives a paste; passphrase and ASCII Banner tests stop flaking (#14, #15) | v0.1, GPT review (2026-11-22) |
-| 4 | [1.1 Sentinel workspace](spec-m1-1-sentinel-workspace.md) | Persistent navigation, useful front page, coherent themes and capability filters | v0.3 draft; waits on Sentinel spec 09 and its amendment 09a (review corrections) |
-| 5 | [1.4 Release editions](spec-m1-4-release-editions.md) | One codebase, full and air-gapped artifacts, first connected DNS tool | v0.2 draft; editions and DNS Lookup decided; needs hardening |
-| 6 | [1.3 Cloud subnet planner](spec-m1-3-cloud-subnet-planner.md) | Local provider-aware IPv4 planning, visual map and reusable exports | v0.1 draft |
+| 3 | [1.5 Paste BOM fidelity and test reliability](spec-m1-5-bom-paste-and-test-reliability.md) | Imported BOM survives a paste; passphrase and ASCII Banner tests stop flaking (#14, #15) | v0.2, approved for dispatch (`recqF2TzzUDjAc4su`) |
+| 4 | [1.6 CI workflow](spec-m1-6-ci-workflow.md) | Pinned actions and runner, plus a Docker image that is built, run and smoke-tested in CI (closes D1) | v0.1, GPT review; workflow change approved by Don (`recqF2TzzUDjAc4su`) |
+| 5 | [1.1 Sentinel workspace](spec-m1-1-sentinel-workspace.md) | Persistent navigation, useful front page, coherent themes and capability filters | v0.4 draft: console layout, command-line search and category pages; waits on Sentinel spec 09 and its amendment 09a |
+| 6 | [1.4 Release editions](spec-m1-4-release-editions.md) | One codebase, full and air-gapped artifacts, first connected DNS tool | v0.3 draft: qualifies the tools present at its start; DNS Lookup and editions decided; needs hardening |
+| 7 | [1.3 Cloud subnet planner](spec-m1-3-cloud-subnet-planner.md) | Local provider-aware IPv4 planning, visual map and reusable exports | v0.2 draft: gate 5 adds the planner to both editions |
 
-Next queue (proposed by Claude, agreed by Don, 2026-11-22): 1.5 first; then 1.1 once Sentinel 09 merges; then
-1.4 ahead of 1.3, because the editions decide how later tools ship. Spec 1.6 (CI
-workflow: the corrected W1 to W3 from 1.0's review and a Docker image build that
-closes D1) is not yet written; it needs Don's explicit workflow approval.
+Order (proposed by Claude, agreed by Don 2026-11-22, batch approval `recqF2TzzUDjAc4su`):
+1.0 and 1.2 have shipped. 1.5 runs next. 1.6 (CI workflow) runs after GPT reviews it.
+1.1 waits until Sentinel spec 09 and its amendment 09a merge, because it pins that
+merge. 1.4 runs before 1.3: it qualifies the tools shipped at its starting commit,
+and 1.3 then adds the cloud planner to both editions and qualifies it there. This
+order supersedes the 2026-11-15 sequencing described below.
 
 Triad review (Claude, 2026-11-15) hardened 1.0 and 1.2 for dispatch after GPT
 review and carried its findings into 1.1. The November 4 central blank line
@@ -41,12 +44,9 @@ historical central specs remain untouched. Dispatch does not implicitly authoriz
 workflow changes, publication, or merges beyond the operator's stated scope.
 
 The closeout worklog records the current branch repair and dependency exceptions.
-Spec 1.0 precedes new functionality because outstanding upstream fixes cross major
-versions. Spec 1.2 runs next, on the current shell (operator decision, 2026-11-15);
-spec 1.1 then restyles it with every other tool, once Sentinel spec 09 has added
-the Ember and Sea palettes it ships. Spec 1.3 follows 1.1 because it
-adopts Sentinel patterns from 1.1's pinned baseline. Spec 1.4 packages their final
-output. Full and air-gapped editions are decided (operator, 2026-11-14, restated
+Spec 1.0 preceded new functionality because outstanding upstream fixes crossed major
+versions, and spec 1.2 shipped on the current shell (operator decision, 2026-11-15)
+for spec 1.1 to restyle with every other tool. Full and air-gapped editions are decided (operator, 2026-11-14, restated
 2026-11-15); DNS Lookup ships first (operator, 2026-11-15 05:07). Preserve existing tool routes throughout; multifunction pages
 are a direction for useful consolidation, not an instruction to rewrite all tools.
 
