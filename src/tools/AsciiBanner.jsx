@@ -34,9 +34,11 @@ export default function AsciiBanner() {
   }, []);
 
   useEffect(() => {
+    let current = true;
     generateBanner(debouncedText, font, { width, horizontalLayout: layout })
-      .then(result => setOutput(result))
-      .catch(() => setOutput(''));
+      .then(result => { if (current) setOutput(result); })
+      .catch(() => { if (current) setOutput(''); });
+    return () => { current = false; };
   }, [debouncedText, font, width, layout]);
 
   const lines = output ? output.split('\n').length : 0;

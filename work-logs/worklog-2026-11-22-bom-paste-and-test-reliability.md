@@ -204,3 +204,47 @@ processes under the pinned npx toolchain, all exit 0, 55/55 each, no unhandled
 errors, elapsed 92.444 s. The runner stops immediately on any failure.
 `git diff main --stat -- src/lib/` is empty. This worklog-only amendment leaves
 qualified test/source bytes identical to the candidate.
+
+### Gate 1.5.3 checkpoint
+
+Gate 1.5.2 sealed commit: `37a103b65b60b7dd2c642c7746c4a9cf20d90b51`.
+Architecture: the generation effect owns a `current` flag; dependency cleanup
+and unmount invalidate it. Both success and failure check the flag before
+calling `setOutput`. Product changes stay inside that effect.
+A1 settles R2 then R1 success; A2 settles R2 then R1 failure. U1/U2 unmount with
+the latest request pending, then settle success/failure. A test-only React state
+wrapper records setter entry after unmount while forwarding every call unchanged;
+this avoids depending on React 18 warnings or tearing down jsdom prematurely.
+Controlled promises and fake debounce time make these four cases deterministic.
+All seven existing test bodies remain unchanged. No rejection handler outside
+the component, suppression, retries or weakened assertions are introduced.
+Clean checkout tests, M3/M4 and 50 banner / 5 full-suite soaks follow.
+
+Gate 1.5.3 validation: clean candidate `6fcc4d4`, Node `v22.23.5`, npm
+`12.0.2`; `npm ci` passed (375 packages, 0 vulnerabilities). Banner tests
+passed 11/11, duration 1.10 s. M3 replaced the effect with the unguarded original:
+A1 displayed `banner ONE`, A2 cleared R2, U1 observed a setter with
+`unmounted banner`, U2 observed a setter with an empty string. All four failed;
+the original seven passed. M3 elapsed 2.024 s. M4 used a ref counter incremented
+only at request start, with no cleanup: A1/A2 and the original seven passed;
+U1/U2 each detected one post-unmount setter call and failed. M4 elapsed 1.992 s.
+Each mutation ran all 11 tests, exited 1 as expected, produced no unhandled error,
+and restored the source byte for byte (SHA-256
+`9957df515446dc77a9651a82c84ad701db39f87e95ea20632de16d765fdbe495`).
+
+Soaks under the pinned toolchain, with immediate stop on nonzero exit or any
+unhandled error: banner 50 consecutive processes, 11/11 each, elapsed 65.535 s;
+full suite 5 consecutive processes, 66/66 files and 648/648 tests each, elapsed
+73.041 s. Full-process times: 14.355, 14.848, 14.646, 14.544 and 14.593 s.
+All 55 processes exited 0 and Vitest reported no unhandled errors. A text check
+confirmed the entire original seven-test `describe` block is byte-identical.
+Product diff changes only the generation effect. This worklog-only amendment
+leaves qualified source/test bytes identical to the candidate. No retries,
+suppression, committed skips or weakened assertions. No out-of-scope changes.
+
+### Gate 1.5.4 — qualification start
+
+Implementation gates are complete. Qualification uses a new clean detached
+worktree, the pinned Node/npm command, production build and required Python
+Playwright runtime. Primary checkout was read-only checked: branch `main`, HEAD
+`a265781fd244851f0a0edf1af21bd3483f88fceb`; it remains untouched.
