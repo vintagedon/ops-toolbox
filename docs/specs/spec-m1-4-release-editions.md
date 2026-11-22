@@ -2,7 +2,7 @@
 title: "1.4 Full and air-gapped releases"
 description: "One source tree with explicit connected capabilities and offline distributions"
 date: "2026-11-14"
-version: "0.2"
+version: "0.3"
 status: "draft"
 tags:
   - type: specification
@@ -11,13 +11,16 @@ tags:
 
 # 1.4 Full and air-gapped releases
 
+v0.3 (Claude, 2026-11-22, batch approval `recqF2TzzUDjAc4su`): 1.4 now runs before 1.3. It qualifies the tools registered at its starting commit; the cloud subnet planner joins both editions through spec 1.3, which qualifies it there. Full hardening happens before dispatch.
+
 ## Outcome
 
 Produce two independently verified builds from one source commit and lockfile.
 The full edition contains local tools plus a DNS Lookup workspace (accepted by the
 operator 2026-11-15 05:07 as the first connected tool). The
 air-gapped edition contains only tools with local processing and offline support,
-including cloud subnet planning. A local-only filter in the full edition remains
+as registered at this spec's starting commit. The cloud subnet planner joins both
+editions later, through spec 1.3. A local-only filter in the full edition remains
 a browsing aid, not a network enforcement switch.
 
 ## Connected-tool contract
@@ -66,7 +69,8 @@ Building may access package registries; running airgap artifacts must not.
 4. **Release qualification.** Use a fresh browser context with no warmed caches;
    allow only the local server and reject every other network request. Visit every
    airgap route and exercise late-loaded wordlists, fonts, diagrams, Text Transformer,
-   subnet import/export and downloads. Inspect outgoing attempts, not just success.
+   file imports and downloads. Qualify the tools registered at the starting commit;
+   do not build or qualify the cloud planner here. Inspect outgoing attempts, not just success.
    Full edition DNS works online and reports failure offline without harming local
    tools. Reinstall/serve both archives and images from documented instructions.
 5. **Publication review.** Document versions, checksum verification and rollback.

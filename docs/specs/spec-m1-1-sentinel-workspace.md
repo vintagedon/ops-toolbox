@@ -2,7 +2,7 @@
 title: "1.1 Sentinel workspace"
 description: "A scalable workspace shell, useful home page, and coherent accessible themes"
 date: "2026-11-14"
-version: "0.3"
+version: "0.4"
 status: "draft"
 tags:
   - type: specification
@@ -18,6 +18,10 @@ System with Sea as the default; Slate and plain Dark leave the menu; the Sentine
 pin moves to the merge of Sentinel spec 09, which adds Ember and Sea. Not yet
 dispatchable: it waits on Sentinel spec 09 and still needs the scope, validation
 and closeout sections that specs 1.0 and 1.2 carry.
+v0.4 (Claude, 2026-11-22, batch approval `recqF2TzzUDjAc4su`): home and navigation
+layout from Don's console mock (layout only; the palette is unchanged), a command
+line as the search, and a page per category. Still waits on Sentinel spec 09 and its
+amendment 09a; the dispatch-ready sections come with hardening at dispatch.
 
 ## Outcome
 
@@ -28,11 +32,11 @@ of invented statistics. Existing URLs and all tools continue to work.
 
 ## Design and data contract
 
-Use the Sentinel baseline at the merge commit of Sentinel spec 09 (Ember and Sea
-palettes) on `vintagedon/sentinel-website-framework` `main`, and record its full
-SHA at dispatch. Its parent baseline is `a5e64fd4ab61a16fbacf414dd9a2740d8bddca2a`
-(the merge of PR #6 on 2026-11-10). This spec does not dispatch until spec 09
-merges. At dispatch, record any other Sentinel commits merged after spec 09; do not adopt them.
+Use the Sentinel baseline at the merge commit of Sentinel PR #9 on
+`vintagedon/sentinel-website-framework` `main`, which carries spec 09 (Ember and Sea
+palettes) and its amendment 09a on one branch; record its full SHA at dispatch. Its parent baseline is `a5e64fd4ab61a16fbacf414dd9a2740d8bddca2a`
+(the merge of PR #6 on 2026-11-10). This spec does not dispatch until PR #9
+merges. At dispatch, record any other Sentinel commits merged after PR #9; do not adopt them.
 Read its design contract, implementation guide and shared tokens; carry attribution
 and license with copied material. Do not import the unmerged schema explorer or
 home widget grid. Keep React/Vite; use local React adapters where needed.
@@ -43,8 +47,9 @@ status. Define local-only filtering as local processing AND no tool network
 requirement; it must not imply that hiding remote tools blocks network requests.
 Separate processing location from the ability to operate disconnected.
 
-Desktop: left navigator plus main content, using about 90% of available content
-width for large workspaces. Mobile: accessible collapsible navigation with focus
+Desktop: left navigator plus main content, together spanning about 90% of the
+viewport width on large screens, with the index filling the main area beside the
+navigator. Mobile: accessible collapsible navigation with focus
 return, Escape handling and visible selected route. Search and category filters
 combine with local-only; show a clear empty state and reset. Do not persist tool
 inputs. Favorites and recent tools are deferred; avoid accounts and cross-device
@@ -69,6 +74,35 @@ AGENTS.md (the Stack line and the `data-theme` constraint, lines 12 and 56 at
 `75ba911`; the Tailwind `slate-*` prohibition and the archived-spec history keep
 their wording) and `docs/design/contrast-standard.md` to say so.
 
+## Home and navigation layout (decided 2026-11-22)
+
+Reference: [console layout mock](../design/references/console-layout-mock-2026-11-22.png),
+specimen 01 from Don's z.ai builder session. Adopt its layout, not its palette or
+its content.
+
+- **Title band.** One compact line of purpose and a stats line computed from the
+  registry at build time: tools in total and tools that run locally. No
+  hand-maintained numbers. Do not claim zero network calls; that stops being true
+  when spec 1.4 adds DNS Lookup.
+- **Command line.** The terminal-style box is the search field. `/` focuses it from
+  anywhere outside a text input; typing filters the index live on name, description
+  and category; Enter opens the top match; Escape clears it and keeps focus. It
+  combines with the category and local-only filters, and an empty result offers a
+  reset.
+- **Index.** One table grouped by category: number, name, category and description
+  per row, with each row a real link to its tool. Each group header shows its count
+  and links to that category's page.
+- **Category pages.** `/category/<slug>` for every registry category (Data,
+  Developer, Networking and Security at `820bc6d`), generated from the registry,
+  prerendered and listed in the sitemap. Each shows the index filtered to that
+  category, with the command line scoped to it.
+- **Navigator.** Categories and their tools, with the current page marked.
+- **Width.** Navigator and main area together span about 90% of the viewport on
+  wide screens, per the design contract above, and the index fills the main area;
+  paragraphs keep a readable measure of about 70 characters.
+- **Left out.** The manifesto, the "All systems nominal" status, the clock, the
+  version string and the specimen switcher.
+
 ## Gates and acceptance
 
 1. **Data first.** Document the metadata contract and test composed filters and
@@ -88,8 +122,13 @@ their wording) and `docs/design/contrast-standard.md` to say so.
    Keyboard users can find/open a tool, skip navigation, use settings and return
    home. Preserve meaningful headings, per-tool lazy imports and error boundaries.
    Existing standalone URLs remain valid; no speculative mega-workspace rewrites.
+   The home and navigation layout above is implemented: `/` focuses the command
+   line, Enter opens the top match, every registry category has a prerendered
+   page in the sitemap, and a test fails if any tool path collides with
+   `category`. At 2560 px the navigator and main area together span at least 85% of
+   the viewport width, and the index spans the full width of the main area.
 4. **Qualification.** All tests/build plus every registered tool (25 after spec 1.2) and About/home. Test 320,
-   768 and 1440 px, all themes, Mono/Comfortable, 200% zoom and navigation focus.
+   768, 1440 and 2560 px, all themes, Mono/Comfortable, 200% zoom and navigation focus.
    No page overflow from ordinary controls; wide data tables may scroll inside a
    labelled region. Inspect rendered screens and record contrast/browser results.
 
@@ -97,5 +136,5 @@ Update architecture, tool reference and privacy wording only to describe shipped
 behavior. Reshoot `assets/directory-hero.png` from the shipped home page and update
 its README alt text; update the count in `scripts/generate_og_card.py` and
 regenerate `public/og.png`. Both say 24 tools today. Output: reviewed shell on main
-before spec 1.3 begins. Spec 1.2 runs first, on the current shell, by operator
+before spec 1.4 begins. Spec 1.2 shipped first, on the current shell, by operator
 decision of 2026-11-15; this spec restyles it with the other tools.
