@@ -32,11 +32,11 @@ of invented statistics. Existing URLs and all tools continue to work.
 
 ## Design and data contract
 
-Use the Sentinel baseline at the merge commit of Sentinel spec 09 (Ember and Sea
-palettes) on `vintagedon/sentinel-website-framework` `main`, and record its full
-SHA at dispatch. Its parent baseline is `a5e64fd4ab61a16fbacf414dd9a2740d8bddca2a`
-(the merge of PR #6 on 2026-11-10). This spec does not dispatch until spec 09
-merges. At dispatch, record any other Sentinel commits merged after spec 09; do not adopt them.
+Use the Sentinel baseline at the merge commit of Sentinel PR #9 on
+`vintagedon/sentinel-website-framework` `main`, which carries spec 09 (Ember and Sea
+palettes) and its amendment 09a on one branch; record its full SHA at dispatch. Its parent baseline is `a5e64fd4ab61a16fbacf414dd9a2740d8bddca2a`
+(the merge of PR #6 on 2026-11-10). This spec does not dispatch until PR #9
+merges. At dispatch, record any other Sentinel commits merged after PR #9; do not adopt them.
 Read its design contract, implementation guide and shared tokens; carry attribution
 and license with copied material. Do not import the unmerged schema explorer or
 home widget grid. Keep React/Vite; use local React adapters where needed.
@@ -47,8 +47,9 @@ status. Define local-only filtering as local processing AND no tool network
 requirement; it must not imply that hiding remote tools blocks network requests.
 Separate processing location from the ability to operate disconnected.
 
-Desktop: left navigator plus main content, using about 90% of available content
-width for large workspaces. Mobile: accessible collapsible navigation with focus
+Desktop: left navigator plus main content, together spanning about 90% of the
+viewport width on large screens, with the index filling the main area beside the
+navigator. Mobile: accessible collapsible navigation with focus
 return, Escape handling and visible selected route. Search and category filters
 combine with local-only; show a clear empty state and reset. Do not persist tool
 inputs. Favorites and recent tools are deferred; avoid accounts and cross-device
@@ -96,8 +97,9 @@ its content.
   prerendered and listed in the sitemap. Each shows the index filtered to that
   category, with the command line scoped to it.
 - **Navigator.** Categories and their tools, with the current page marked.
-- **Width.** About 90% of the viewport on wide screens, per the design contract
-  above; paragraphs keep a readable measure of about 70 characters.
+- **Width.** Navigator and main area together span about 90% of the viewport on
+  wide screens, per the design contract above, and the index fills the main area;
+  paragraphs keep a readable measure of about 70 characters.
 - **Left out.** The manifesto, the "All systems nominal" status, the clock, the
   version string and the specimen switcher.
 
@@ -123,7 +125,8 @@ its content.
    The home and navigation layout above is implemented: `/` focuses the command
    line, Enter opens the top match, every registry category has a prerendered
    page in the sitemap, and a test fails if any tool path collides with
-   `category`. At 2560 px the index spans at least 85% of the viewport width.
+   `category`. At 2560 px the navigator and main area together span at least 85% of
+   the viewport width, and the index spans the full width of the main area.
 4. **Qualification.** All tests/build plus every registered tool (25 after spec 1.2) and About/home. Test 320,
    768, 1440 and 2560 px, all themes, Mono/Comfortable, 200% zoom and navigation focus.
    No page overflow from ordinary controls; wide data tables may scroll inside a
