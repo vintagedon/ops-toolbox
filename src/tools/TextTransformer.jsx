@@ -108,7 +108,7 @@ export default function TextTransformer() {
     const text = field.value.slice(0, field.selectionStart)
       + pasted
       + field.value.slice(field.selectionEnd);
-    const imported = { ...editedSource(text, source), bom: false };
+    const imported = editedSource(text, source);
     importRevision.current++;
     setSource(imported);
     setBaseline(imported);
