@@ -151,6 +151,51 @@ describe('TextTransformer', () => {
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:test');
   });
 
+  it.each([
+    ['B1', '\uFEFF', 'efbbbf61585962630d0a6465660d0a'],
+    ['B2', '', '61585962630d0a6465660d0a'],
+  ])('%s: paste at offset 1 retains the imported BOM state', async (_, bom, expected) => {
+    const downloadBytes = captureDownload();
+    render(<TextTransformer />);
+    upload(new File([bom + 'abc\r\ndef\r\n'], 'windows.txt'));
+    await waitFor(() => expect(input()).toHaveValue('abc\ndef\n'));
+    input().setSelectionRange(1, 1);
+    fireEvent.paste(input(), { clipboardData: { getData: () => 'XY' } });
+    await ready();
+    const bytes = await downloadBytes();
+    expect(Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join('')).toBe(expected);
+  });
+
+  it('B3: Restore original retains the pasted baseline and its BOM after typing', async () => {
+    const downloadBytes = captureDownload();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    render(<TextTransformer />);
+    upload(new File(['\uFEFFabc\r\ndef\r\n'], 'windows.txt'));
+    await waitFor(() => expect(input()).toHaveValue('abc\ndef\n'));
+    input().setSelectionRange(1, 1);
+    fireEvent.paste(input(), { clipboardData: { getData: () => 'XY' } });
+    await ready();
+    typeAtEnd('z');
+    expect(input()).toHaveValue('aXYbc\ndef\nz');
+    click('Restore original');
+    expect(window.confirm).toHaveBeenCalledOnce();
+    await ready();
+    const bytes = await downloadBytes();
+    expect(Array.from(bytes, byte => byte.toString(16).padStart(2, '0')).join(''))
+      .toBe('efbbbf61585962630d0a6465660d0a');
+  });
+
+  it('B4: select-all paste replaces text and retains the imported BOM', async () => {
+    const downloadBytes = captureDownload();
+    render(<TextTransformer />);
+    upload(new File(['\uFEFFabc\r\ndef\r\n'], 'windows.txt'));
+    await waitFor(() => expect(input()).toHaveValue('abc\ndef\n'));
+    input().setSelectionRange(0, input().value.length);
+    fireEvent.paste(input(), { clipboardData: { getData: () => 'fresh' } });
+    await ready();
+    expect(Array.from(await downloadBytes())).toEqual(Array.from(new TextEncoder().encode('\uFEFFfresh')));
+  });
+
   it('accepts the 2 MiB boundary without truncation', async () => {
     render(<TextTransformer />);
     const text = 'a'.repeat(2 * 1024 * 1024);
